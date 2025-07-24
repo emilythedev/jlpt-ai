@@ -37,75 +37,30 @@ model = genai.GenerativeModel(GEMINI_MODEL_ID)
 
 # Pydantic models for request and response
 class QuestionResponse(BaseModel):
-    question_text: str = Field(..., example="次の文の（　　）に入れるのに最もよいものを、１・２・３・４から一つ選びなさい。\n彼女はまるで（　　）ように日本語を話す。")
-    options: list[str] = Field(..., example=["１．日本人だった", "２．日本人である", "３．日本人であるかのような", "４．日本人だ"])
-    correct_answer_index: int = Field(..., example=2) # 0-indexed
-    explanation: str = Field(..., example="「まるで〜ようだ」は、「まるで〜であるかのような」と、見かけはそうだが実際は違うことを表す比喩表現です。選択肢３がこの文法に合致します。")
+    question: str
+    options: list[str]
+    correct_answer_index: int
 
-@app.get("/")
-async def root():
-    return {"message": "FastAPI server with Gemini Flash is running!"}
+sample_response_json = QuestionResponse(
+    question="先生のご指導（　　）、試験に合格できました。",
+    options=["のおかげで", "なせいで", "のおかげに", "にもかかわらず"],
+    correct_answer_index=0
+).model_dump_json()
 
-@app.get("/generate_jlpt_n3_question", response_model=QuestionResponse)
-async def generate_jlpt_n3_question():
-    prompt = """
-    JLPT N3レベルの文法または語彙を使った日本語の四択問題を作成してください。
-    問題文、選択肢（４つ）、正解、そして簡単な解説をJSON形式で提供してください。
-    正解の選択肢のインデックスは0から3で指定してください。
-
-    例:
-    {
-      "question_text": "次の文の（　　）に入れるのに最もよいものを、１・２・３・４から一つ選びなさい。\n彼女はまるで（　　）ように日本語を話す。",
-      "options": [
-        "１．日本人だった",
-        "２．日本人である",
-        "３．日本人であるかのような",
-        "４．日本人だ"
-      ],
-      "correct_answer_index": 2,
-      "explanation": "「まるで〜ようだ」は、「まるで〜であるかのような」と、見かけはそうだが実際は違うことを表す比喩表現です。選択肢３がこの文法に合致します。"
-    }
-
-    JLPT N3レベルの文法ポイントの例:
-    - ～ばいい (can, should, it would be good if)
-    - ～ことになっている (to be scheduled or expected to)
-    - ～に慣れる (to get used to)
-    - ～仕方がない (it can't be helped)
-    - ～わけにはいかない (cannot due to circumstances)
-    - ～ような気がする (I have a feeling that)
-    - ～からこそ (especially because)
-    - ～だそうです (I heard that, it seems that)
-    - ～しかない (have no choice but to)
-    - ～ふり (pretend to)
-
-    JLPT N3レベルの語彙の例:
-    - 運転 (うんてん - driving)
-    - 運動 (うんどう - exercise)
-    - 犯罪 (はんざい - crime)
-    - 判断 (はんだん - judgement)
-    - 比較 (ひかく - comparison)
-    - 秘密 (ひみつ - secret)
-    - 微妙 (びみょう - delicate, subtle)
-    - 費用 (ひよう - cost)
-    - 評価 (ひょうか - evaluation)
-    - 表現 (ひょうげん - expression)
-    - 表情 (ひょうじょう - facial expression)
-    - 平等 (びょうどう - equality)
-    - 向こう (むこう - over there)
-    - 夢中 (むちゅう - absorbed in)
-    - 滅多に (めったに - rarely)
-    - 面倒 (めんどう - trouble, bother)
-    - 目的 (もくてき - purpose)
-    - 申し込む (もうしこむ - to apply)
-    - やはり/やっぱり (as expected)
-
-    上記の例を参考に、新しい問題を生成してください。
+@app.get("/question", response_model=QuestionResponse)
+async def generate_jlpt_question():
+    prompt = f"""
+    JLPT N3レベルの文法または語彙を使った日本語四択問題を1問、正解インデックスとともにJSON形式で生成。
+    正解インデックスは0から3の間でランダムに選択してください。
+    他のテキストは不要。
+    例: {sample_response_json}
     """
 
     try:
         response = model.generate_content(prompt)
-        # Gemini often returns text with markdown code blocks, try to extract directly
         text_response = response.text.strip()
+
+        # Remove markdown code block wrappers if they appear, as we want pure JSON
         if text_response.startswith("```json"):
             text_response = text_response.replace("```json", "").replace("```", "").strip()
         elif text_response.startswith("```"):
@@ -121,7 +76,11 @@ async def generate_jlpt_n3_question():
 
     except Exception as e:
         print(f"Error generating question: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to generate question: {e}")
+        detail = str(e)
+        # Attempt to provide more context if JSON parsing failed
+        if "JSON" in detail or "value_error.missing" in detail or "validation error" in detail:
+            detail = f"AI response was not valid JSON or missing fields. Raw response (first 200 chars): {text_response[:200]}... Full error: {e}"
+        raise HTTPException(status_code=500, detail=f"Failed to generate question: {detail}")
 
 if __name__ == "__main__":
     import uvicorn
