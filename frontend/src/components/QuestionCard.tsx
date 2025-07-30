@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { Question } from '@/lib/types';
+import { cn } from '@/lib/utils';
 import React, { useEffect } from "react";
 
 type QuestionCardOptionProps = {
@@ -29,7 +30,7 @@ type QuestionCardProps = {
   sequence: number;
 };
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ question, onSelect, showAnswer, sequence }) => {
+const QuestionCard = ({ question, onSelect, showAnswer, sequence }: QuestionCardProps) => {
   const [value, setValue] = React.useState<string | null>(null);
   const handleChange = (idxString: string) => {
     setValue(idxString);
@@ -64,5 +65,16 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onSelect, showAns
     </div>
   );
 };
+
+QuestionCard.Skeleton = ({ className }: { className?: string }) => (
+  <div className={cn(className, 'p-8 border rounded shadow w-full bg-white animate-pulse')}>
+    <div className="mb-8 h-6 bg-gray-200 rounded w-3/4"></div>
+    <div className="space-y-2">
+      {[...Array(4)].map((_, idx) => (
+        <div key={idx} className="h-8 bg-gray-200 rounded w-full"></div>
+      ))}
+    </div>
+  </div>
+);
 
 export default QuestionCard;

@@ -51,7 +51,7 @@ const Quiz = () => {
 
   if (isLoading) {
     return (
-      <div className="text-center text-xl p-12 text-gray-700">Loading question...</div>
+      <QuestionCard.Skeleton className="w-full max-w-xl" />
     );
   }
 
