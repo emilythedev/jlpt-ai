@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import type { Question } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { ChevronsRight, Loader2Icon } from 'lucide-react';
 import { useState } from 'react';
 import QuestionCard from './QuestionCard';
 
@@ -78,12 +79,18 @@ const Quiz = () => {
         sequence={totalQuestions}
       />
       <div className="mt-8">
-        <Button
-          onClick={handleNextQuestion}
-          disabled={isFetching}
-        >
-          {isFetching ? 'Fetching next question...' : 'Next Question'}
-        </Button>
+        {isFetching ? (
+          <Button disabled>
+            <Loader2Icon className="animate-spin" />
+            読み込み中...
+          </Button>
+        ) : (
+          <Button onClick={handleNextQuestion}>
+            次の問題へ
+            <ChevronsRight />
+          </Button>
+        )}
+
       </div>
     </div>
   );
