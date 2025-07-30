@@ -9,7 +9,9 @@ const questionApiUrl = 'http://localhost:8000/question';
 
 const Quiz = () => {
   const [selectedAnswerIdx, setSelectedAnswerIdx] = useState<number | null>(null);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [showAnswer, setShowAnswer] = useState<boolean>(false);
+  const [totalQuestions, setTotalQuestions] = useState<number>(0);
+  const [score, setScore] = useState<number>(0);
 
   const {
     data: question, // 'data' is renamed to 'question' for clarity
@@ -24,7 +26,8 @@ const Quiz = () => {
       const response = await axios.get<Question>(questionApiUrl);
       // Reset local state when a new question is successfully fetched
       setSelectedAnswerIdx(null);
-      setFeedback(null);
+      setShowAnswer(false);
+      setTotalQuestions(n => n + 1);
       return response.data;
     },
     // query runs on initial component mount
@@ -32,17 +35,16 @@ const Quiz = () => {
   });
 
   const handleOptionSelect = (optionIdx: number) => {
-    if (question) {
-      setSelectedAnswerIdx(optionIdx);
-      if (optionIdx === question.correct_answer_index) {
-        setFeedback("Correct! 🎉");
-      } else {
-        setFeedback(`Incorrect.`);
-      }
-    }
+    if (question) setSelectedAnswerIdx(optionIdx);
   };
 
   const handleNextQuestion = () => {
+    if (question) {
+      setShowAnswer(true);
+      if (selectedAnswerIdx === question.correct_answer_index) {
+        setScore(n => n + 1);
+      }
+    }
     refetch();
   };
 
@@ -65,26 +67,16 @@ const Quiz = () => {
       <div className="text-center text-xl p-12 text-gray-700">No question available.</div>
     );
   }
- // Determine feedback background and text color classes
-  const feedbackBgClass = feedback?.startsWith("Correct") ? 'bg-green-100' : 'bg-red-100';
-  const feedbackTextColorClass = feedback?.startsWith("Correct") ? 'text-green-800' : 'text-red-800';
-  const feedbackBorderClass = feedback?.startsWith("Correct") ? 'border-green-300' : 'border-red-300';
-
 
   return (
     <div className="p-4">
+      <div className="font-medium">Score: {score}</div>
       <QuestionCard
         question={question}
+        showAnswer={showAnswer}
         onSelect={handleOptionSelect}
+        sequence={totalQuestions}
       />
-      {selectedAnswerIdx !== null && (
-        <div className={`text-center mt-5 p-4 rounded-md mx-auto max-w-xl
-                        border ${feedbackBgClass} ${feedbackTextColorClass} ${feedbackBorderClass}`}>
-          <strong className="block text-lg">Your selection:</strong>
-          <span className="block text-xl font-medium mt-1">{question.options[selectedAnswerIdx]}</span>
-          <p className="mt-3 font-bold text-xl">{feedback}</p>
-        </div>
-      )}
       <div className="text-center mt-8">
         <Button
           onClick={handleNextQuestion}
