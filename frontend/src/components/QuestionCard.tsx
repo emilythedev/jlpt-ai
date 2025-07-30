@@ -17,7 +17,7 @@ const QuestionCardOption: React.FC<QuestionCardOptionProps> = ({ label, value, s
   return (
     <div className={`flex items-center space-x-2 ${showCorrect ? (isCorrect ? correctOptionClassName : incorrectOptionClassName) : ''}`}>
       <RadioGroupItem value={value} id={label} />
-      <Label htmlFor={label}>{label}</Label>
+      <Label htmlFor={label} className="py-2">{label}</Label>
     </div>
   );
 };
@@ -43,10 +43,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onSelect, showAns
   }, [question])
 
   return (
-    <div className="p-4 border rounded shadow max-w-xl bg-white">
-      <div className="mb-4 font-semibold text-lg">{sequence}. {question.question}</div>
+    <div className="p-8 border rounded shadow w-full bg-white">
+      <div className="mb-8 font-semibold text-lg">{sequence}. {question.question}</div>
       <RadioGroup
-        className="flex flex-col"
+        className="gap-1"
         onValueChange={handleChange}
         value={value}
         disabled={showAnswer}

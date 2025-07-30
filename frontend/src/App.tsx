@@ -18,7 +18,9 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Quiz />
+      <div className="container mx-auto py-8 flex flex-col items-center">
+        <Quiz />
+      </div>
     </QueryClientProvider>
   )
 }

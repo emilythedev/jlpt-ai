@@ -69,15 +69,15 @@ const Quiz = () => {
   }
 
   return (
-    <div className="p-4">
-      <div className="font-medium">Score: {score}</div>
+    <div className="w-full max-w-xl">
+      <div className="mb-4 font-medium">Score: {score}</div>
       <QuestionCard
         question={question}
         showAnswer={showAnswer}
         onSelect={handleOptionSelect}
         sequence={totalQuestions}
       />
-      <div className="text-center mt-8">
+      <div className="mt-8">
         <Button
           onClick={handleNextQuestion}
           disabled={isFetching}
