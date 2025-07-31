@@ -1,4 +1,4 @@
-import Quiz from '@/components/Quiz';
+import GrammarQuiz from '@/components/GrammarQuiz';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // 1. Create a QueryClient instance
@@ -19,7 +19,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="container mx-auto py-8 flex flex-col items-center">
-        <Quiz />
+        <GrammarQuiz />
       </div>
     </QueryClientProvider>
   )

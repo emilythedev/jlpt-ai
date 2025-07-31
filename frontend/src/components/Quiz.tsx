@@ -1,14 +1,22 @@
 import { Button } from '@/components/ui/button';
-import type { Question } from '@/lib/types';
+import type { JLPTLevel, Question } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { ChevronsRight, Loader2Icon } from 'lucide-react';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import QuestionCard from './QuestionCard';
 
-const questionApiUrl = 'http://localhost:8000/question';
+type QuizProps = {
+  level: JLPTLevel;
+}
 
-const Quiz = () => {
+const questionApiUrl = 'http://localhost:8000/question';
+const fetchQuestion = async (level: JLPTLevel) => {
+  const response = await axios.get<Question>(questionApiUrl + `?lv=${level}`);
+  return response.data;
+};
+
+const Quiz: React.FC<QuizProps> = ({ level }) => {
   const [selectedAnswerIdx, setSelectedAnswerIdx] = useState<number | null>(null);
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
   const [totalQuestions, setTotalQuestions] = useState<number>(0);
@@ -20,19 +28,12 @@ const Quiz = () => {
     isError,      // true if there's an error
     error,        // The error object if isError is true
     refetch,      // Function to manually re-fetch the query
-    isFetching    // true when a fetch is in progress (can be during initial load or refetch)
+    isFetching,    // true when a fetch is in progress (can be during initial load or refetch)
+    isSuccess
   } = useQuery<Question, Error>({
-    queryKey: ['quizQuestion'],
-    queryFn: async () => {
-      const response = await axios.get<Question>(questionApiUrl);
-      // Reset local state when a new question is successfully fetched
-      setSelectedAnswerIdx(null);
-      setShowAnswer(false);
-      setTotalQuestions(n => n + 1);
-      return response.data;
-    },
-    // query runs on initial component mount
-    enabled: true,
+    queryKey: ['quizQuestion', level],
+    queryFn: async () => fetchQuestion(level),
+    enabled: true,  // query runs on initial component mount
   });
 
   const handleOptionSelect = (optionIdx: number) => {
@@ -48,6 +49,14 @@ const Quiz = () => {
     }
     refetch();
   };
+
+  useEffect(() => {
+    if (!isSuccess) return;
+    // Reset local state when a new question is successfully fetched
+    setSelectedAnswerIdx(null);
+    setShowAnswer(false);
+    setTotalQuestions(n => n + 1);
+  }, [isSuccess, question]);
 
   if (isLoading) {
     return (
@@ -71,7 +80,8 @@ const Quiz = () => {
 
   return (
     <div className="w-full max-w-xl">
-      <div className="mb-4 font-medium">Score: {score}</div>
+      <div className="mb-4 font-medium">JLPT {level.toUpperCase()} の問題</div>
+      <div className="mb-4 font-medium">得点：{score}</div>
       <QuestionCard
         question={question}
         showAnswer={showAnswer}
