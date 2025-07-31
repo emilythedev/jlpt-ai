@@ -17,7 +17,7 @@ const fetchQuestion = async (level: JLPTLevel) => {
 };
 
 const Quiz: React.FC<QuizProps> = ({ level }) => {
-  const [selectedAnswerIdx, setSelectedAnswerIdx] = useState<number | null>(null);
+  const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
   const [totalQuestions, setTotalQuestions] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
@@ -36,14 +36,14 @@ const Quiz: React.FC<QuizProps> = ({ level }) => {
     enabled: true,  // query runs on initial component mount
   });
 
-  const handleOptionSelect = (optionIdx: number) => {
-    if (question) setSelectedAnswerIdx(optionIdx);
+  const handleAnswerValidated = (corrected: boolean) => {
+    if (question) setIsCorrect(corrected);
   };
 
   const handleNextQuestion = () => {
     if (question) {
       setShowAnswer(true);
-      if (selectedAnswerIdx === question.correct_answer_index) {
+      if (isCorrect) {
         setScore(n => n + 1);
       }
     }
@@ -53,7 +53,7 @@ const Quiz: React.FC<QuizProps> = ({ level }) => {
   useEffect(() => {
     if (!isSuccess) return;
     // Reset local state when a new question is successfully fetched
-    setSelectedAnswerIdx(null);
+    setIsCorrect(false);
     setShowAnswer(false);
     setTotalQuestions(n => n + 1);
   }, [isSuccess, question]);
@@ -85,7 +85,7 @@ const Quiz: React.FC<QuizProps> = ({ level }) => {
       <QuestionCard
         question={question}
         showAnswer={showAnswer}
-        onSelect={handleOptionSelect}
+        onValidated={handleAnswerValidated}
         sequence={totalQuestions}
       />
       <div className="mt-8">

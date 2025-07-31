@@ -26,17 +26,15 @@ const QuestionCardOption: React.FC<QuestionCardOptionProps> = ({ label, value, s
 type QuestionCardProps = {
   question: Question;
   showAnswer?: boolean;
-  onSelect?: (selectedIndex: number) => void;
+  onValidated?: (isCorrect: boolean) => void;
   sequence: number;
 };
 
-const QuestionCard = ({ question, onSelect, showAnswer, sequence }: QuestionCardProps) => {
+const QuestionCard = ({ question, onValidated, showAnswer, sequence }: QuestionCardProps) => {
   const [value, setValue] = React.useState<string | null>(null);
-  const handleChange = (idxString: string) => {
-    setValue(idxString);
-
-    const idx = parseInt(idxString);
-    if (onSelect && !isNaN(idx)) onSelect(idx);
+  const handleChange = (value: string) => {
+    setValue(value);
+    if (onValidated) onValidated(value === question.correct_answer);
   };
 
   useEffect(() => {
@@ -56,9 +54,9 @@ const QuestionCard = ({ question, onSelect, showAnswer, sequence }: QuestionCard
           <QuestionCardOption
             key={idx}
             label={opt}
-            value={`${idx}`}
+            value={opt}
             showCorrect={showAnswer}
-            isCorrect={idx === question.correct_answer_index}
+            isCorrect={opt === question.correct_answer}
           />
         ))}
       </RadioGroup>

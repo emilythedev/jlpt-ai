@@ -16,13 +16,13 @@ model = genai.GenerativeModel(GEMINI_MODEL_ID)
 class QuestionResponse(BaseModel):
     question: str
     options: list[str]
-    correct_answer_index: int
+    correct_answer: str
     explanation: str
 
 sample_response_json = QuestionResponse(
     question="先生のご指導（　　）、試験に合格できました。",
     options=["のおかげで", "なせいで", "のおかげに", "にもかかわらず"],
-    correct_answer_index=0,
+    correct_answer="のおかげで",
     explanation="「～のおかげで」は、恩恵や良い結果の原因を表す表現です。"
 ).model_dump_json()
 
@@ -34,7 +34,6 @@ async def generate_grammar_mc(level: JLPTLevel):
 
     prompt = f"""
     JLPT {level_for_prompt}レベルの文法または語彙を使った日本語四択問題を1問、正解インデックスと簡潔な日本語の解説とともにJSON形式で生成。
-    正解インデックスは0から3の間でランダムに選択してください。
     他のテキストは不要。
     例: {sample_response_json}
     """
@@ -49,9 +48,5 @@ async def generate_grammar_mc(level: JLPTLevel):
         text_response = text_response.replace("```", "").strip()
 
     question_data = QuestionResponse.model_validate_json(text_response)
-
-    # Basic validation to ensure the structure is correct
-    if not (0 <= question_data.correct_answer_index < len(question_data.options)):
-        raise ValueError("Correct answer index is out of bounds.")
 
     return question_data

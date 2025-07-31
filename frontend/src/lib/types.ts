@@ -1,7 +1,8 @@
 export interface Question {
-  question: string
-  options: string[]
-  correct_answer_index: number
+  question: string;
+  options: string[];
+  correct_answer: string;
+  explanation: string;
 }
 
 export const JLPTLevelValues = ['n1', 'n2', 'n3', 'n4', 'n5'] as const; // 'as const' creates a tuple with literal types
