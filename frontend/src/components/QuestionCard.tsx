@@ -26,20 +26,21 @@ const QuestionCardOption: React.FC<QuestionCardOptionProps> = ({ label, value, s
 type QuestionCardProps = {
   question: Question;
   showAnswer?: boolean;
-  onValidated?: (isCorrect: boolean) => void;
+  onAnswered?: (answer: string) => void;
   sequence: number;
+  selectedAnswer?: string;
 };
 
-const QuestionCard = ({ question, onValidated, showAnswer, sequence }: QuestionCardProps) => {
-  const [value, setValue] = React.useState<string | null>(null);
+const QuestionCard = ({ question, onAnswered, showAnswer, sequence, selectedAnswer }: QuestionCardProps) => {
+  const [value, setValue] = React.useState<string>(selectedAnswer || '');
   const handleChange = (value: string) => {
     setValue(value);
-    if (onValidated) onValidated(value === question.correct_answer);
+    if (onAnswered) onAnswered(value);
   };
 
   useEffect(() => {
-    setValue(null); // Reset value when question changes
-  }, [question])
+    setValue(selectedAnswer || ''); // Reset value when question changes
+  }, [question, selectedAnswer])
 
   return (
     <div className="p-8 border rounded shadow w-full bg-white">

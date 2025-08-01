@@ -7,3 +7,5 @@ export interface Question {
 
 export const JLPTLevelValues = ['n1', 'n2', 'n3', 'n4', 'n5'] as const; // 'as const' creates a tuple with literal types
 export type JLPTLevel = (typeof JLPTLevelValues)[number];
+
+export type QuestionHistory = Question & { selectedAnswer: string };

@@ -8,6 +8,7 @@ import QuestionCard from './QuestionCard';
 
 type QuizProps = {
   level: JLPTLevel;
+  onQuestionCompleted?: (question: Question, selectedAnswer: string) => void,
 }
 
 const questionApiUrl = 'http://localhost:8000/question';
@@ -16,11 +17,10 @@ const fetchQuestion = async (level: JLPTLevel) => {
   return response.data;
 };
 
-const Quiz: React.FC<QuizProps> = ({ level }) => {
-  const [isCorrect, setIsCorrect] = useState<boolean>(false);
+const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
+  const [selectedAnswer, setSelectedAnswer] = useState<string>('');
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
   const [totalQuestions, setTotalQuestions] = useState<number>(0);
-  const [score, setScore] = useState<number>(0);
 
   const {
     data: question, // 'data' is renamed to 'question' for clarity
@@ -36,16 +36,14 @@ const Quiz: React.FC<QuizProps> = ({ level }) => {
     enabled: true,  // query runs on initial component mount
   });
 
-  const handleAnswerValidated = (corrected: boolean) => {
-    if (question) setIsCorrect(corrected);
+  const handleAnswer = (answer: string) => {
+    if (question) setSelectedAnswer(answer);
   };
 
   const handleNextQuestion = () => {
     if (question) {
       setShowAnswer(true);
-      if (isCorrect) {
-        setScore(n => n + 1);
-      }
+      if (onQuestionCompleted) onQuestionCompleted(question, selectedAnswer);
     }
     refetch();
   };
@@ -53,7 +51,7 @@ const Quiz: React.FC<QuizProps> = ({ level }) => {
   useEffect(() => {
     if (!isSuccess) return;
     // Reset local state when a new question is successfully fetched
-    setIsCorrect(false);
+    setSelectedAnswer('');
     setShowAnswer(false);
     setTotalQuestions(n => n + 1);
   }, [isSuccess, question]);
@@ -80,12 +78,10 @@ const Quiz: React.FC<QuizProps> = ({ level }) => {
 
   return (
     <div className="w-full max-w-xl">
-      <div className="mb-4 font-medium">JLPT {level.toUpperCase()} の問題</div>
-      <div className="mb-4 font-medium">得点：{score}</div>
       <QuestionCard
         question={question}
         showAnswer={showAnswer}
-        onValidated={handleAnswerValidated}
+        onAnswered={handleAnswer}
         sequence={totalQuestions}
       />
       <div className="mt-8">
