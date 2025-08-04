@@ -18,8 +18,8 @@ const fetchQuestion = async (level: JLPTLevel) => {
 };
 
 const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
-  const [selectedAnswer, setSelectedAnswer] = useState<string>('');
-  const [showAnswer, setShowAnswer] = useState<boolean>(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<string>(''); // for feedback review
+  const [showResult, setShowResult] = useState<boolean>(false);
   const [totalQuestions, setTotalQuestions] = useState<number>(0);
 
   const {
@@ -42,7 +42,7 @@ const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
 
   const handleNextQuestion = () => {
     if (question) {
-      setShowAnswer(true);
+      setShowResult(true);
       if (onQuestionCompleted) onQuestionCompleted(question, selectedAnswer);
     }
     refetch();
@@ -52,7 +52,7 @@ const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
     if (!isSuccess) return;
     // Reset local state when a new question is successfully fetched
     setSelectedAnswer('');
-    setShowAnswer(false);
+    setShowResult(false);
     setTotalQuestions(n => n + 1);
   }, [isSuccess, question]);
 
@@ -80,7 +80,7 @@ const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
     <div className="w-full max-w-xl">
       <QuestionCard
         question={question}
-        showAnswer={showAnswer}
+        showResult={showResult}
         onAnswered={handleAnswer}
         sequence={totalQuestions}
       />

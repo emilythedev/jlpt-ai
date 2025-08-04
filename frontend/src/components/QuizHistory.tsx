@@ -14,8 +14,8 @@ const QuizHistory = ({ history }: QuizHistoyProps) => {
             key={idx}
             sequence={idx + 1}
             question={questionHistory}
-            selectedAnswer={questionHistory.selectedAnswer}
-            showAnswer
+            defaultValue={questionHistory.selectedAnswer}
+            showResult
           />
         ))}
       </div>

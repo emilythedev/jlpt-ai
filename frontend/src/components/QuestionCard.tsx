@@ -4,19 +4,18 @@ import type { Question } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import React, { useEffect } from "react";
 
-type QuestionCardOptionProps = {
-  label: string;
-  value: string;
-  showCorrect?: boolean;
-  isCorrect?: boolean;
-}
-
 const correctOptionClassName = 'bg-green-100 text-green-800';
 const incorrectOptionClassName = 'has-[[data-state="checked"]]:bg-red-100 has-[[data-state="checked"]]:text-red-800';
 
-const QuestionCardOption: React.FC<QuestionCardOptionProps> = ({ label, value, showCorrect, isCorrect }) => {
+type QuestionCardOptionProps = {
+  label: string;
+  value: string;
+  className?: string;
+}
+
+const QuestionCardOption: React.FC<QuestionCardOptionProps> = ({ label, value, className }) => {
   return (
-    <div className={`flex items-center space-x-2 ${showCorrect ? (isCorrect ? correctOptionClassName : incorrectOptionClassName) : ''}`}>
+    <div className={cn('flex items-center space-x-2', className)}>
       <RadioGroupItem value={value} id={label} />
       <Label htmlFor={label} className="py-2">{label}</Label>
     </div>
@@ -25,22 +24,23 @@ const QuestionCardOption: React.FC<QuestionCardOptionProps> = ({ label, value, s
 
 type QuestionCardProps = {
   question: Question;
-  showAnswer?: boolean;
+  showResult?: boolean;
   onAnswered?: (answer: string) => void;
   sequence: number;
-  selectedAnswer?: string;
+  defaultValue?: string;
 };
 
-const QuestionCard = ({ question, onAnswered, showAnswer, sequence, selectedAnswer }: QuestionCardProps) => {
-  const [value, setValue] = React.useState<string>(selectedAnswer || '');
+const QuestionCard = ({ question, onAnswered, showResult, sequence, defaultValue }: QuestionCardProps) => {
+  const [value, setValue] = React.useState<string>(defaultValue || '');
   const handleChange = (value: string) => {
     setValue(value);
     if (onAnswered) onAnswered(value);
   };
 
   useEffect(() => {
-    setValue(selectedAnswer || ''); // Reset value when question changes
-  }, [question, selectedAnswer])
+    setValue(defaultValue || ''); // Reset value when question changes
+    // as `defaultValue` prop on <RadioGroup> will be overwrittened by `value`
+  }, [question, defaultValue])
 
   return (
     <div className="p-8 border rounded shadow w-full bg-white">
@@ -49,17 +49,21 @@ const QuestionCard = ({ question, onAnswered, showAnswer, sequence, selectedAnsw
         className="gap-1"
         onValueChange={handleChange}
         value={value}
-        disabled={showAnswer}
+        disabled={showResult}
       >
-        {question.options.map((opt, idx) => (
-          <QuestionCardOption
-            key={idx}
-            label={opt}
-            value={opt}
-            showCorrect={showAnswer}
-            isCorrect={opt === question.correct_answer}
-          />
-        ))}
+        {question.options.map((opt, idx) => {
+          const isCorrectOption = opt === question.correct_answer;
+          const className = !showResult ? '' :
+            (isCorrectOption ? correctOptionClassName : incorrectOptionClassName);
+          return (
+            <QuestionCardOption
+              key={idx}
+              label={opt}
+              value={opt}
+              className={className}
+            />
+          );
+        })}
       </RadioGroup>
     </div>
   );
