@@ -46,7 +46,13 @@ const GrammarQuiz = () => {
   }
 
   if (showResult) {
-    return (<QuizFeedback feedbacks={result} />);
+    return (
+      <>
+        <div className="mb-4 font-medium">JLPT {selectedLevel.toUpperCase()} の問題の結果</div>
+        <div className="mb-4 font-medium text-xl">得点：{score}</div>
+        <QuizFeedback feedbacks={result} />
+      </>
+    );
   }
 
   return (
