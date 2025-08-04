@@ -33,7 +33,7 @@ const GrammarQuiz = () => {
 
   const addQuestion = useCallback((question: Question, selectedAnswer: string) => {
     if (selectedAnswer === question.correct_answer) setScore(n => n + 1);
-    setResult((prev) => [...prev, { ...question, selectedAnswer }]);
+    setResult((prev) => [...prev, { ...question, selectedAnswer, sequence: prev.length + 1 }]);
   }, [setResult, setScore]);
 
   if (!selectedLevel) {
@@ -49,7 +49,8 @@ const GrammarQuiz = () => {
     return (
       <>
         <div className="mb-4 font-medium">JLPT {selectedLevel.toUpperCase()} の問題の結果</div>
-        <div className="mb-4 font-medium text-xl">得点：{score}</div>
+        <div className="font-medium text-xl">得点：{score}</div>
+        <div className="mb-4 text-sm">合計 {result.length} 問</div>
         <QuizFeedback feedbacks={result} />
       </>
     );
