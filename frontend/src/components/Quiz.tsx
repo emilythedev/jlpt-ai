@@ -96,7 +96,6 @@ const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
             <ChevronsRight />
           </Button>
         )}
-
       </div>
     </div>
   );
