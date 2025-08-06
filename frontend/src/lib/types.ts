@@ -9,3 +9,5 @@ export const JLPTLevelValues = ['n1', 'n2', 'n3', 'n4', 'n5'] as const; // 'as c
 export type JLPTLevel = (typeof JLPTLevelValues)[number];
 
 export type QuestionFeedback = Question & { selectedAnswer: string, sequence: number };
+
+export type Section = 'grammar' | 'vocabulary';
