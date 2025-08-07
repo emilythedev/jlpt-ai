@@ -1,68 +1,10 @@
-import { Button } from '@/components/ui/button';
+import SaveQuestionButton from '@/components/SaveQuestionButton';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { db, type MultipleChoiceQuestionModel } from '@/lib/db';
+import { type MultipleChoiceQuestionModel } from '@/lib/db';
 import type { QuestionFeedback } from '@/lib/types';
-import { Bookmark, Check } from 'lucide-react';
-import { startTransition, useOptimistic, useState } from 'react';
+import { useState } from 'react';
 import QuestionCard from './QuestionCard';
-
-interface SaveToQuestionBankButtonProps {
-  id?: number;
-  questionData: MultipleChoiceQuestionModel;
-  onIdUpdated: (id?: number) => void;
-}
-
-const SaveToQuestionBankButton = ({ id, questionData, onIdUpdated }: SaveToQuestionBankButtonProps) => {
-  const isSaved = !!id;
-  const [optimisticSaveState, setOptimisticSaveState] = useOptimistic(isSaved,
-    (_, isSaved: boolean) => isSaved);
-
-  const handleSave = async () => {
-    startTransition(() => setOptimisticSaveState(true));
-
-    try {
-      const id = await db.mc.add(questionData);
-      onIdUpdated(id);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const handleUnsave = async () => {
-    if (!id) return;
-
-    startTransition(() => setOptimisticSaveState(false));
-
-    try {
-      await db.mc.delete(id);
-      onIdUpdated();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  if (optimisticSaveState) {
-    return (
-      <Button
-        variant="ghost"
-        onClick={handleUnsave}
-      >
-        <Check />
-        保存した
-      </Button>
-    );
-  }
-
-  return (
-    <Button
-      onClick={handleSave}
-    >
-      <Bookmark />
-      後で復習
-    </Button>
-  );
-};
 
 interface QuizFeedbackProps {
   feedbacks: QuestionFeedback[];
@@ -138,7 +80,7 @@ const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
               {questionData.question.explanation}
             </div>
 
-            <SaveToQuestionBankButton
+            <SaveQuestionButton
               id={id}
               questionData={questionData}
               onIdUpdated={(id) => handleFeedbackIdUpdated(sequence, id)}
