@@ -14,10 +14,7 @@ type QuizProps = {
 const questionApiUrl = 'http://localhost:8000/question';
 const fetchQuestion = async (level: JLPTLevel) => {
   const response = await axios.get<Omit<Question, 'generatedAt'>>(questionApiUrl + `?lv=${level}`);
-  return {
-    generatedAt: new Date(),
-    ...response.data,
-  };
+  return response.data;
 };
 
 const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {

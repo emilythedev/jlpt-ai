@@ -2,53 +2,41 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { db, type MultipleChoiceQuestionModel } from '@/lib/db';
-import type { Question, QuestionFeedback } from '@/lib/types';
+import type { QuestionFeedback } from '@/lib/types';
 import { Bookmark, Check } from 'lucide-react';
-import { startTransition, useEffect, useOptimistic, useState } from 'react';
+import { startTransition, useOptimistic, useState } from 'react';
 import QuestionCard from './QuestionCard';
 
 interface SaveToQuestionBankButtonProps {
-  question: Question
-  correctAnsweredAt?: Date;
+  id?: number;
+  questionData: MultipleChoiceQuestionModel;
+  onIdUpdated: (id?: number) => void;
 }
 
-const SaveToQuestionBankButton = ({ question, correctAnsweredAt }: SaveToQuestionBankButtonProps) => {
-  const id = question.generatedAt.getTime();
-
-  const [saveState, setSaveState] = useState<boolean>(false);
-  const [optimisticSaveState, setOptimisticSaveState] = useOptimistic(saveState,
+const SaveToQuestionBankButton = ({ id, questionData, onIdUpdated }: SaveToQuestionBankButtonProps) => {
+  const isSaved = !!id;
+  const [optimisticSaveState, setOptimisticSaveState] = useOptimistic(isSaved,
     (_, isSaved: boolean) => isSaved);
-
-  useEffect(() => {
-    db.mc.get(id)
-      .then((obj) => setSaveState(!!obj))
-      .catch((err) => console.log(err));
-  }, [id])
 
   const handleSave = async () => {
     startTransition(() => setOptimisticSaveState(true));
 
     try {
-      await db.mc.add({
-        id,
-        level: 'n3', // TODO: global setting
-        section: 'grammar',
-        question,
-        lastCorrectAt: correctAnsweredAt,
-      } as MultipleChoiceQuestionModel);
-
-      startTransition(() => setSaveState(true));
+      const id = await db.mc.add(questionData);
+      onIdUpdated(id);
     } catch (err) {
       console.log(err);
     }
   };
 
   const handleUnsave = async () => {
+    if (!id) return;
+
     startTransition(() => setOptimisticSaveState(false));
 
     try {
       await db.mc.delete(id);
-      startTransition(() => setSaveState(false));
+      onIdUpdated();
     } catch (err) {
       console.log(err);
     }
@@ -83,8 +71,43 @@ interface QuizFeedbackProps {
 const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
   const [showWrongAnswerOnly, setShowWrongAnswerOnly] = useState<boolean>(false);
 
-  const filteredFeedbacks = !showWrongAnswerOnly ? feedbacks :
-    feedbacks.filter(q => !q.correctAnsweredAt);
+  const [feedbacksWithId, setFeedbacksWithId] = useState<{
+    sequence: number,
+    answer: string,
+    id?: number,
+    questionData: MultipleChoiceQuestionModel,
+  }[]>(feedbacks.map(({
+    sequence,
+    answer,
+    correctAnsweredAt,
+    ...question
+  }) => {
+    return {
+      sequence,
+      answer,
+
+      id: undefined,
+      questionData: {
+        level: 'n3', // TODO: global setting
+        section: 'grammar',
+        question,
+        lastCorrectAt: correctAnsweredAt,
+      } as MultipleChoiceQuestionModel,
+    };
+  }));
+
+  const handleFeedbackIdUpdated = (sequence: number, id?: number) => {
+    setFeedbacksWithId(list => list.map(feedback => {
+      if (feedback.sequence !== sequence) return feedback;
+      return {
+        ...feedback,
+        id,
+      };
+    }))
+  };
+
+  const filteredFeedbacks = !showWrongAnswerOnly ? feedbacksWithId :
+    feedbacksWithId.filter(data => !data.questionData.lastCorrectAt);
 
   return (
     <>
@@ -101,23 +124,24 @@ const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
         {filteredFeedbacks.map(({
           sequence,
           answer,
-          correctAnsweredAt,
-          ...question
+          id,
+          questionData,
         }) => (
           <QuestionCard
             key={sequence}
             sequence={sequence}
-            question={question}
+            question={questionData.question}
             defaultValue={answer}
             showResult
           >
             <div className="mt-8 mb-8 p-4 bg-green-100 text-green-800">
-              {question.explanation}
+              {questionData.question.explanation}
             </div>
 
             <SaveToQuestionBankButton
-              question={question}
-              correctAnsweredAt={correctAnsweredAt}
+              id={id}
+              questionData={questionData}
+              onIdUpdated={(id) => handleFeedbackIdUpdated(sequence, id)}
             />
           </QuestionCard>
         ))}

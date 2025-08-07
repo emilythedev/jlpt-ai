@@ -1,5 +1,4 @@
 export interface Question {
-  generatedAt: Date;
   question: string;
   options: string[];
   correct_answer: string;
