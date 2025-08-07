@@ -1,4 +1,5 @@
 export interface Question {
+  generatedAt: Date;
   question: string;
   options: string[];
   correct_answer: string;
@@ -8,6 +9,10 @@ export interface Question {
 export const JLPTLevelValues = ['n1', 'n2', 'n3', 'n4', 'n5'] as const; // 'as const' creates a tuple with literal types
 export type JLPTLevel = (typeof JLPTLevelValues)[number];
 
-export type QuestionFeedback = Question & { selectedAnswer: string, sequence: number };
+export type QuestionFeedback = Question & {
+  sequence: number;
+  answer: string;
+  correctAnsweredAt?: Date;
+};
 
 export type Section = 'grammar' | 'vocabulary';

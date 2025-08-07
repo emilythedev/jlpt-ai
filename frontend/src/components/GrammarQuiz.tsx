@@ -33,7 +33,12 @@ const GrammarQuiz = () => {
 
   const addQuestion = useCallback((question: Question, selectedAnswer: string) => {
     if (selectedAnswer === question.correct_answer) setScore(n => n + 1);
-    setResult((prev) => [...prev, { ...question, selectedAnswer, sequence: prev.length + 1 }]);
+    setResult((prev) => [...prev, {
+      ...question,
+      answer: selectedAnswer,
+      sequence: prev.length + 1,
+      correctAnsweredAt: selectedAnswer === question.correct_answer ? new Date() : undefined,
+    }]);
   }, [setResult, setScore]);
 
   if (!selectedLevel) {

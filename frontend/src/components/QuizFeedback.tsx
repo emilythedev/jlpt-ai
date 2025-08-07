@@ -8,56 +8,47 @@ import { startTransition, useOptimistic, useState } from 'react';
 import QuestionCard from './QuestionCard';
 
 interface SaveToQuestionBankButtonProps {
-  question: Question;
-  selectedAnswer: string;
+  question: Question
+  correctAnsweredAt?: Date;
 }
 
-type QuestionSaveState = {
-  isSaved: boolean;
-  id?: number;
-};
+const SaveToQuestionBankButton = ({ question, correctAnsweredAt }: SaveToQuestionBankButtonProps) => {
+  const id = question.generatedAt.getTime();
 
-const SaveToQuestionBankButton = ({ question, selectedAnswer }: SaveToQuestionBankButtonProps) => {
-  const [saveState, setSaveState] = useState<QuestionSaveState>({ isSaved: false });
+  const [saveState, setSaveState] = useState<boolean>(false);
   const [optimisticSaveState, setOptimisticSaveState] = useOptimistic(saveState,
-    (_, action: 'SAVE' | 'UNSAVE') => {
-      return  { isSaved: action === 'SAVE' };
-    }
-  );
+    (_, isSaved: boolean) => isSaved);
 
   const handleSave = async () => {
-    startTransition(() => setOptimisticSaveState('SAVE'));
+    startTransition(() => setOptimisticSaveState(true));
 
     try {
-      const questionId = await db.mc.add({
+      await db.mc.add({
+        id,
         level: 'n3', // TODO: global setting
         section: 'grammar',
         question,
-        lastCorrectAt: selectedAnswer === question.correct_answer ? new Date() : undefined,
+        lastCorrectAt: correctAnsweredAt,
       } as MultipleChoiceQuestionModel);
 
-      startTransition(() => setSaveState({ isSaved: true, id: questionId }));
+      startTransition(() => setSaveState(true));
     } catch (err) {
       console.log(err);
-      startTransition(() => setSaveState({ isSaved: false })); // rollback optimistic state
     }
   };
 
   const handleUnsave = async () => {
-    startTransition(() => setOptimisticSaveState('UNSAVE'));
-
-    if (!saveState.id) return;
+    startTransition(() => setOptimisticSaveState(false));
 
     try {
-      await db.mc.delete(saveState.id);
-      startTransition(() => setSaveState({ isSaved: false }));
+      await db.mc.delete(id);
+      startTransition(() => setSaveState(false));
     } catch (err) {
       console.log(err);
-      startTransition(() => setSaveState(state => ({...state}))); // rollback optimistic state
     }
   };
 
-  if (optimisticSaveState.isSaved) {
+  if (optimisticSaveState) {
     return (
       <Button
         variant="ghost"
@@ -87,7 +78,7 @@ const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
   const [showWrongAnswerOnly, setShowWrongAnswerOnly] = useState<boolean>(false);
 
   const filteredFeedbacks = !showWrongAnswerOnly ? feedbacks :
-    feedbacks.filter(q => q.correct_answer !== q.selectedAnswer);
+    feedbacks.filter(q => !q.correctAnsweredAt);
   // BUG: lost db state after save correct question and then toggle visibility
 
   return (
@@ -104,14 +95,15 @@ const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
       <div className="flex flex-col w-full max-w-2xl gap-16">
         {filteredFeedbacks.map(({
           sequence,
-          selectedAnswer,
+          answer,
+          correctAnsweredAt,
           ...question
         }) => (
           <QuestionCard
             key={sequence}
             sequence={sequence}
             question={question}
-            defaultValue={selectedAnswer}
+            defaultValue={answer}
             showResult
           >
             <div className="mt-8 mb-8 p-4 bg-green-100 text-green-800">
@@ -120,7 +112,7 @@ const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
 
             <SaveToQuestionBankButton
               question={question}
-              selectedAnswer={selectedAnswer}
+              correctAnsweredAt={correctAnsweredAt}
             />
           </QuestionCard>
         ))}

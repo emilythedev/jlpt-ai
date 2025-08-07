@@ -9,7 +9,7 @@ interface BaseModel {
 interface MultipleChoiceQuestionModel {
   level: JLPTLevel;
   section: Section;
-  question: Question;
+  question: Omit<Question, 'generatedAt'>;
   lastCorrectAt?: Date;
 }
 
