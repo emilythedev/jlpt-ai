@@ -4,7 +4,7 @@ import { Switch } from '@/components/ui/switch';
 import { db, type MultipleChoiceQuestionModel } from '@/lib/db';
 import type { Question, QuestionFeedback } from '@/lib/types';
 import { Bookmark, Check } from 'lucide-react';
-import { startTransition, useOptimistic, useState } from 'react';
+import { startTransition, useEffect, useOptimistic, useState } from 'react';
 import QuestionCard from './QuestionCard';
 
 interface SaveToQuestionBankButtonProps {
@@ -18,6 +18,12 @@ const SaveToQuestionBankButton = ({ question, correctAnsweredAt }: SaveToQuestio
   const [saveState, setSaveState] = useState<boolean>(false);
   const [optimisticSaveState, setOptimisticSaveState] = useOptimistic(saveState,
     (_, isSaved: boolean) => isSaved);
+
+  useEffect(() => {
+    db.mc.get(id)
+      .then((obj) => setSaveState(!!obj))
+      .catch((err) => console.log(err));
+  }, [id])
 
   const handleSave = async () => {
     startTransition(() => setOptimisticSaveState(true));
@@ -79,7 +85,6 @@ const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
 
   const filteredFeedbacks = !showWrongAnswerOnly ? feedbacks :
     feedbacks.filter(q => !q.correctAnsweredAt);
-  // BUG: lost db state after save correct question and then toggle visibility
 
   return (
     <>
