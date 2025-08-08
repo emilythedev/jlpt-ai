@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GrammarIndexRouteImport } from './routes/grammar/index'
+import { Route as GrammarLevelRouteImport } from './routes/grammar/$level'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,30 +23,39 @@ const GrammarIndexRoute = GrammarIndexRouteImport.update({
   path: '/grammar/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GrammarLevelRoute = GrammarLevelRouteImport.update({
+  id: '/grammar/$level',
+  path: '/grammar/$level',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/grammar/$level': typeof GrammarLevelRoute
   '/grammar': typeof GrammarIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/grammar/$level': typeof GrammarLevelRoute
   '/grammar': typeof GrammarIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/grammar/$level': typeof GrammarLevelRoute
   '/grammar/': typeof GrammarIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/grammar'
+  fullPaths: '/' | '/grammar/$level' | '/grammar'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/grammar'
-  id: '__root__' | '/' | '/grammar/'
+  to: '/' | '/grammar/$level' | '/grammar'
+  id: '__root__' | '/' | '/grammar/$level' | '/grammar/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GrammarLevelRoute: typeof GrammarLevelRoute
   GrammarIndexRoute: typeof GrammarIndexRoute
 }
 
@@ -65,11 +75,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GrammarIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/grammar/$level': {
+      id: '/grammar/$level'
+      path: '/grammar/$level'
+      fullPath: '/grammar/$level'
+      preLoaderRoute: typeof GrammarLevelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GrammarLevelRoute: GrammarLevelRoute,
   GrammarIndexRoute: GrammarIndexRoute,
 }
 export const routeTree = rootRouteImport
