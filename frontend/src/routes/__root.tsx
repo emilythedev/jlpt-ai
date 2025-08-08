@@ -8,12 +8,14 @@ export const Route = createRootRoute({
         <Link to="/" className="[&.active]:font-bold">
           Home
         </Link>{' '}
-        <Link to="/about" className="[&.active]:font-bold">
-          About
+        <Link to="/grammar" className="[&.active]:font-bold">
+          文法
         </Link>
       </div>
       <hr />
-      <Outlet />
+      <div className="container mx-auto py-8 flex flex-col items-center">
+        <Outlet />
+      </div>
       <TanStackRouterDevtools />
     </>
   ),
