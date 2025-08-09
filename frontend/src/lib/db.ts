@@ -1,4 +1,4 @@
-import type { JLPTLevel, Question, Section } from '@/lib/types';
+import type { QuestionFeedback } from '@/lib/types';
 import Dexie, { type EntityTable } from 'dexie';
 
 interface BaseModel {
@@ -6,16 +6,11 @@ interface BaseModel {
   createdAt?: Date;
 }
 
-interface MultipleChoiceQuestionModel {
-  level: JLPTLevel;
-  section: Section;
-  question: Omit<Question, 'generatedAt'>;
-  lastCorrectAt?: Date;
-}
+interface MultipleChoiceQuestionModel extends BaseModel, QuestionFeedback {}
 
 const db = new Dexie('jlpt-ai-db') as Dexie & {
   mc: EntityTable<
-    MultipleChoiceQuestionModel & BaseModel,
+    MultipleChoiceQuestionModel,
     'id'
   >;
 };

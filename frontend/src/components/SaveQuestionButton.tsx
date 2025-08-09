@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button';
-import { db, type MultipleChoiceQuestionModel } from '@/lib/db';
+import { db } from '@/lib/db';
+import type { QuestionFeedback } from '@/lib/types';
 import { Bookmark, Check } from 'lucide-react';
 import { startTransition, useOptimistic } from 'react';
 
 interface SaveQuestionButtonProps {
   id?: number;
-  questionData: MultipleChoiceQuestionModel;
+  questionData: QuestionFeedback;
   onIdUpdated: (id?: number) => void;
 }
 

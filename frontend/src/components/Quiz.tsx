@@ -8,7 +8,7 @@ import QuestionCard from './QuestionCard';
 
 type QuizProps = {
   level: JLPTLevel;
-  onQuestionCompleted?: (question: Question, selectedAnswer: string) => void,
+  onQuestionCompleted?: (question: Question, answer: string, sequence: number) => void,
 }
 
 const questionApiUrl = 'http://localhost:8000/question';
@@ -43,7 +43,7 @@ const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
   const handleNextQuestion = () => {
     if (question) {
       setShowResult(true);
-      if (onQuestionCompleted) onQuestionCompleted(question, selectedAnswer);
+      if (onQuestionCompleted) onQuestionCompleted(question, selectedAnswer, totalQuestions);
     }
     refetch();
   };

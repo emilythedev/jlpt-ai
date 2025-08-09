@@ -8,10 +8,11 @@ export interface Question {
 export const JLPTLevelValues = ['n1', 'n2', 'n3', 'n4', 'n5'] as const; // 'as const' creates a tuple with literal types
 export type JLPTLevel = (typeof JLPTLevelValues)[number];
 
-export type QuestionFeedback = Question & {
-  sequence: number;
-  answer: string;
-  correctAnsweredAt?: Date;
+export type QuestionFeedback = {
+  level: JLPTLevel;
+  section: Section;
+  question: Question;
+  lastCorrectAt?: Date;
 };
 
 export type Section = 'grammar' | 'vocabulary';

@@ -1,55 +1,21 @@
 import SaveQuestionButton from '@/components/SaveQuestionButton';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { type MultipleChoiceQuestionModel } from '@/lib/db';
-import type { QuestionFeedback } from '@/lib/types';
+import { useSetAtom } from 'jotai';
 import { useState } from 'react';
 import QuestionCard from './QuestionCard';
+import { updateQuestionIdAtom, type QuestionAtomType } from './questionAtoms';
 
 interface QuizFeedbackProps {
-  feedbacks: QuestionFeedback[];
+  feedbacks: QuestionAtomType[];
 }
 
 const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
   const [showWrongAnswerOnly, setShowWrongAnswerOnly] = useState<boolean>(false);
+  const updateQuestionId = useSetAtom(updateQuestionIdAtom);
 
-  const [feedbacksWithId, setFeedbacksWithId] = useState<{
-    sequence: number,
-    answer: string,
-    id?: number,
-    questionData: MultipleChoiceQuestionModel,
-  }[]>(feedbacks.map(({
-    sequence,
-    answer,
-    correctAnsweredAt,
-    ...question
-  }) => {
-    return {
-      sequence,
-      answer,
-
-      id: undefined,
-      questionData: {
-        level: 'n3', // TODO: global setting
-        section: 'grammar',
-        question,
-        lastCorrectAt: correctAnsweredAt,
-      } as MultipleChoiceQuestionModel,
-    };
-  }));
-
-  const handleFeedbackIdUpdated = (sequence: number, id?: number) => {
-    setFeedbacksWithId(list => list.map(feedback => {
-      if (feedback.sequence !== sequence) return feedback;
-      return {
-        ...feedback,
-        id,
-      };
-    }))
-  };
-
-  const filteredFeedbacks = !showWrongAnswerOnly ? feedbacksWithId :
-    feedbacksWithId.filter(data => !data.questionData.lastCorrectAt);
+  const filteredFeedbacks = !showWrongAnswerOnly ? feedbacks :
+    feedbacks.filter(data => !data.questionData.lastCorrectAt);
 
   return (
     <>
@@ -83,7 +49,7 @@ const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
             <SaveQuestionButton
               id={id}
               questionData={questionData}
-              onIdUpdated={(id) => handleFeedbackIdUpdated(sequence, id)}
+              onIdUpdated={(id) => updateQuestionId({ sequence, newId: id })}
             />
           </QuestionCard>
         ))}
