@@ -20,7 +20,7 @@ const fetchQuestion = async (level: JLPTLevel) => {
 const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
   const [selectedAnswer, setSelectedAnswer] = useState<string>(''); // for feedback review
   const [showResult, setShowResult] = useState<boolean>(false);
-  const [totalQuestions, setTotalQuestions] = useState<number>(0);
+  const [sequence, setSequence] = useState<number>(1);
 
   const {
     data: question, // 'data' is renamed to 'question' for clarity
@@ -29,34 +29,40 @@ const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
     error,        // The error object if isError is true
     refetch,      // Function to manually re-fetch the query
     isFetching,    // true when a fetch is in progress (can be during initial load or refetch)
-    isSuccess
+    isFetchedAfterMount,
   } = useQuery<Question, Error>({
     queryKey: ['quizQuestion', level],
     queryFn: async () => fetchQuestion(level),
     enabled: true,  // query runs on initial component mount
+    refetchOnMount: 'always', // fetch a new question on remount
   });
 
   const handleAnswer = (answer: string) => {
     if (question) setSelectedAnswer(answer);
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (question) {
       setShowResult(true);
-      if (onQuestionCompleted) onQuestionCompleted(question, selectedAnswer, totalQuestions);
+      if (onQuestionCompleted) onQuestionCompleted(question, selectedAnswer, sequence);
     }
-    refetch();
+    await refetch();
+
+    // Reset local state and increment sequence when a new question is fetched
+    setSelectedAnswer('');
+    setShowResult(false);
+    setSequence(prev => prev + 1);
   };
 
   useEffect(() => {
-    if (!isSuccess) return;
-    // Reset local state when a new question is successfully fetched
-    setSelectedAnswer('');
-    setShowResult(false);
-    setTotalQuestions(n => n + 1);
-  }, [isSuccess, question]);
+    return () => {
+      setSequence(1);
+      setSelectedAnswer('');
+      setShowResult(false);
+    };
+  }, []);
 
-  if (isLoading) {
+  if (isLoading || !isFetchedAfterMount) {
     return (
       <QuestionCard.Skeleton className="w-full max-w-xl" />
     );
@@ -82,7 +88,7 @@ const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
         question={question}
         showResult={showResult}
         onAnswered={handleAnswer}
-        sequence={totalQuestions}
+        sequence={sequence}
       />
       <div className="mt-8">
         {isFetching ? (
