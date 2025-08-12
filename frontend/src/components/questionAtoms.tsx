@@ -9,50 +9,66 @@ export type QuestionAtomType = {
   answer: string;
 };
 
-const answeredQuestionsAtom = atomWithStorage<QuestionAtomType[]>(
-  'answeredQuestions',
-  []
-);
-export const scoreAtom = atomWithStorage<number>(
-  'score',
-  0
+type ResultAtomType = {
+  score: number;
+  answeredQuestions: QuestionAtomType[];
+};
+
+const resultAtom = atomWithStorage<ResultAtomType>(
+  'result',
+  { score: 0, answeredQuestions: [] }
 );
 
-export const resetQuestionsAtom = atom(null,
-  (_, set) => {
-    set(scoreAtom, 0);
-    set(answeredQuestionsAtom, []);
+export const getResultAtom = atom(get => get(resultAtom));
+export const getScoreAtom = atom(get => get(resultAtom).score);
+
+/**
+ * atomWithStorage cannot be used together with atomWithReducer.
+ * Separate actions into atom instead of using reducer function,
+ * is more atomic and can be benifited from code splitting or lazy loading.
+ *
+ * https://jotai.org/docs/guides/composing-atoms#action-atoms
+ */
+
+// write-only atom to reset result
+export const resetResultAtom = atom(null,
+  (_, set) => set(resultAtom, { score: 0, answeredQuestions: [] })
+);
+
+// write-only atom to add answered question and update score
+export const addAnsweredQuestionAtom = atom(null,
+  (_, set, question: QuestionAtomType, deltaScore: number = 0) => {
+    set(resultAtom, prevResult => {
+      const currentQuestions = prevResult.answeredQuestions;
+      return {
+        score: prevResult.score + deltaScore,
+        answeredQuestions: [...currentQuestions, question],
+      };
+    });
   }
 );
 
-// write-only atom for adding a new question
-export const addQuestionAtom = atom(
-  null,
-  (get, set, newQuestion: QuestionAtomType) => {
-    const currentQuestions = get(answeredQuestionsAtom);
-    set(answeredQuestionsAtom, [...currentQuestions, newQuestion]);
+// write-only atom to update question ID by sequence
+export const updateQuestionIdAtom = atom(null,
+  (_, set, sequence: number, newId?: number) => {
+    set(resultAtom, prevResult => {
+      const currentQuestions = prevResult.answeredQuestions;
+      const index = currentQuestions.findIndex(question => question.sequence === sequence);
+      if (index < 0) return prevResult;
+
+      const updatedQuestions = [...currentQuestions];
+      const questionToUpdate = { ...updatedQuestions[index] };
+      if (newId === undefined) {
+        delete questionToUpdate.id;
+      } else {
+        questionToUpdate.id = newId;
+      }
+      updatedQuestions[index] = questionToUpdate;
+
+      return {
+        score: prevResult.score,
+        answeredQuestions: updatedQuestions,
+      };
+    });
   }
 );
-
-// write-only atom for updating a question's 'id' prop
-export const updateQuestionIdAtom = atom(
-  null,
-  (get, set, { sequence, newId }: { sequence: number; newId?: number }) => {
-    const currentQuestions = get(answeredQuestionsAtom);
-    const index = currentQuestions.findIndex(data => data.sequence === sequence);
-    if (index < 0) return;
-
-    const updatedQuestions = [...currentQuestions];
-    const questionToUpdate = { ...updatedQuestions[index] };
-    if (newId === undefined) {
-      delete questionToUpdate.id;
-    } else {
-      questionToUpdate.id = newId;
-    }
-    updatedQuestions[index] = questionToUpdate;
-    set(answeredQuestionsAtom, updatedQuestions);
-  }
-);
-
-// read-only atom to retrieve the list of questions
-export const getAnsweredQuestionsAtom = atom((get) => get(answeredQuestionsAtom));

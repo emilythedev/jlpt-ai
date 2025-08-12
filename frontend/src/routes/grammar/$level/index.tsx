@@ -1,5 +1,5 @@
 import GrammarQuiz from '@/components/GrammarQuiz';
-import { resetQuestionsAtom } from '@/components/questionAtoms';
+import { resetResultAtom } from '@/components/questionAtoms';
 import type { JLPTLevel } from '@/lib/types';
 import { createFileRoute } from '@tanstack/react-router';
 import { useSetAtom } from 'jotai';
@@ -16,10 +16,10 @@ export const Route = createFileRoute('/grammar/$level/')({
 
 function RouteComponent() {
   const { level } = Route.useParams();
-  const resetQuestions = useSetAtom(resetQuestionsAtom);
+  const resetResult = useSetAtom(resetResultAtom);
 
   useEffect(() => {
-    resetQuestions();
+    resetResult();
   }, []);
 
   return <GrammarQuiz level={level as JLPTLevel} />

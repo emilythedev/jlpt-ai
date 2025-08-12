@@ -2,16 +2,15 @@ import Quiz from '@/components/Quiz';
 import { Button } from '@/components/ui/button';
 import { type JLPTLevel, type Question } from '@/lib/types';
 import { Link } from '@tanstack/react-router';
-import { useAtom, useSetAtom } from 'jotai';
-import { addQuestionAtom, scoreAtom } from './questionAtoms';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { addAnsweredQuestionAtom, getScoreAtom } from './questionAtoms';
 
 const GrammarQuiz = ({ level }: { level: JLPTLevel }) => {
-  const addQuestion = useSetAtom(addQuestionAtom);
-  const [score, setScore] = useAtom(scoreAtom);
+  const addQuestion = useSetAtom(addAnsweredQuestionAtom);
+  const score = useAtomValue(getScoreAtom);
 
   const handleQuestionCompleted = (question: Question, answer: string, sequence: number) => {
     const isCorrect = answer === question.correct_answer;
-    if (isCorrect) setScore(n => n + 1);
 
     addQuestion({
       answer,
@@ -22,7 +21,7 @@ const GrammarQuiz = ({ level }: { level: JLPTLevel }) => {
         question: question,
         lastCorrectAt: isCorrect ? new Date() : undefined,
       },
-    });
+    }, isCorrect ? 1 : 0);
   };
 
   return (
