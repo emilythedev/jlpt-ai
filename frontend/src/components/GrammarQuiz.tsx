@@ -32,8 +32,8 @@ const GrammarQuiz = ({ level }: { level: JLPTLevel }) => {
       <Link to='/grammar/$level/result' params={{ level }}>
         <Button
           variant="secondary"
-          className="mt-8"
-        >End and View Feedback</Button>
+          className="mt-16"
+        >終わり</Button>
       </Link>
     </>
   );
