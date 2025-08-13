@@ -5,6 +5,7 @@ import { useSetAtom } from 'jotai';
 import { useState } from 'react';
 import QuestionCard from './QuestionCard';
 import { updateQuestionIdAtom, type QuestionAtomType } from './questionAtoms';
+import { CardFooter } from './ui/card';
 
 interface QuizFeedbackProps {
   feedbacks: QuestionAtomType[];
@@ -42,15 +43,17 @@ const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
             defaultValue={answer}
             showResult
           >
-            <div className="mt-8 mb-8 p-4 bg-green-100 text-green-800">
-              {questionData.question.explanation}
-            </div>
+            <CardFooter className="flex-col gap-2 items-stretch">
+              <div className="p-4 bg-green-100 text-green-800">
+                {questionData.question.explanation}
+              </div>
 
-            <SaveQuestionButton
-              id={id}
-              questionData={questionData}
-              onIdUpdated={(id) => updateQuestionId(sequence, id)}
-            />
+              <SaveQuestionButton
+                id={id}
+                questionData={questionData}
+                onIdUpdated={(id) => updateQuestionId(sequence, id)}
+              />
+            </CardFooter>
           </QuestionCard>
         ))}
       </div>

@@ -1,3 +1,4 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { Question } from '@/lib/types';
@@ -44,42 +45,50 @@ const QuestionCard = ({ question, onAnswered, showResult, sequence, defaultValue
   }, [question, defaultValue])
 
   return (
-    <div className="p-8 border rounded shadow w-full bg-white">
-      <div className="mb-8 font-semibold text-lg">{sequence}. {question.question}</div>
-      <RadioGroup
-        className="gap-1"
-        onValueChange={handleChange}
-        value={value}
-        disabled={showResult}
-      >
-        {question.options.map((opt, idx) => {
-          const isCorrectOption = opt === question.correct_answer;
-          const className = !showResult ? '' :
-            (isCorrectOption ? correctOptionClassName : incorrectOptionClassName);
-          return (
-            <QuestionCardOption
-              key={idx}
-              label={opt}
-              value={opt}
-              className={className}
-            />
-          );
-        })}
-      </RadioGroup>
+    <Card>
+      <CardHeader>
+        <CardTitle>{sequence}. {question.question}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <RadioGroup
+          className="gap-1"
+          onValueChange={handleChange}
+          value={value}
+          disabled={showResult}
+        >
+          {question.options.map((opt, idx) => {
+            const isCorrectOption = opt === question.correct_answer;
+            const className = !showResult ? '' :
+              (isCorrectOption ? correctOptionClassName : incorrectOptionClassName);
+            return (
+              <QuestionCardOption
+                key={idx}
+                label={opt}
+                value={opt}
+                className={className}
+              />
+            );
+          })}
+        </RadioGroup>
+      </CardContent>
       {children}
-    </div>
+    </Card>
   );
 };
 
 QuestionCard.Skeleton = ({ className }: { className?: string }) => (
-  <div className={cn(className, 'p-8 border rounded shadow w-full bg-white animate-pulse')}>
-    <div className="mb-8 h-6 bg-gray-200 rounded w-3/4"></div>
-    <div className="space-y-2">
-      {[...Array(4)].map((_, idx) => (
-        <div key={idx} className="h-8 bg-gray-200 rounded w-full"></div>
-      ))}
-    </div>
-  </div>
+  <Card className={cn(className, 'animate-pulse')}>
+    <CardHeader>
+      <CardTitle className="h-6 bg-gray-200 rounded w-full"></CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-2">
+        {[...Array(4)].map((_, idx) => (
+          <div key={idx} className="h-6 bg-gray-200 rounded w-64"></div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
 );
 
 export default QuestionCard;

@@ -64,7 +64,10 @@ const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
 
   if (isLoading || !isFetchedAfterMount) {
     return (
-      <QuestionCard.Skeleton className="w-full max-w-xl" />
+      <div className="w-full max-w-xl">
+        <QuestionCard.Skeleton />
+        <div className="mt-8 rounded h-8 w-32 bg-gray-200 animate-pulse"></div>
+      </div>
     );
   }
 
