@@ -16,7 +16,7 @@ const db = new Dexie('jlpt-ai-db') as Dexie & {
 };
 
 db.version(1).stores({
-  mc: '++id, level, section, lastCorrectAt',
+  mc: '++id, level, section, [level+section]',
 });
 
 db.mc.hook('creating', (_, obj) => {
