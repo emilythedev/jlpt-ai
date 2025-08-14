@@ -64,10 +64,10 @@ const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
 
   if (isLoading || !isFetchedAfterMount) {
     return (
-      <div className="w-full max-w-xl">
+      <>
         <QuestionCard.Skeleton />
         <div className="mt-8 rounded h-8 w-32 bg-gray-200 animate-pulse"></div>
-      </div>
+      </>
     );
   }
 
@@ -86,7 +86,7 @@ const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
   }
 
   return (
-    <div className="w-full max-w-xl">
+    <>
       <QuestionCard
         question={question}
         showResult={showResult}
@@ -106,7 +106,7 @@ const Quiz: React.FC<QuizProps> = ({ level, onQuestionCompleted }) => {
           </Button>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

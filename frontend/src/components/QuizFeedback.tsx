@@ -20,7 +20,7 @@ const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
 
   return (
     <>
-      <div className="flex items-center space-x-2 mb-4">
+      <div className="flex items-center space-x-2 mb-16">
         <Switch
           id='wrong-ans-only'
           checked={showWrongAnswerOnly}

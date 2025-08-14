@@ -25,7 +25,7 @@ const GrammarQuiz = ({ level }: { level: JLPTLevel }) => {
   };
 
   return (
-    <>
+    <div className="w-full">
       <div className="mb-4 font-medium">JLPT {level.toUpperCase()} の問題</div>
       <div className="mb-4 font-medium">得点：{score}</div>
       <Quiz level={level} onQuestionCompleted={handleQuestionCompleted} />
@@ -35,7 +35,7 @@ const GrammarQuiz = ({ level }: { level: JLPTLevel }) => {
           className="mt-16"
         >終わり</Button>
       </Link>
-    </>
+    </div>
   );
 };
 

@@ -13,7 +13,7 @@ export const Route = createRootRoute({
         </Link>
       </div>
       <hr />
-      <div className="container mx-auto py-8 flex flex-col items-center">
+      <div className="w-full max-w-xl mx-auto py-8 flex flex-col items-center">
         <Outlet />
       </div>
       <TanStackRouterDevtools />
