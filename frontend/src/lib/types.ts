@@ -15,4 +15,8 @@ export type QuestionFeedback = {
   lastCorrectAt?: Date;
 };
 
-export type Section = 'grammar' | 'vocabulary';
+export const SectionValues = [
+  'grammar',
+  'vocabulary',
+] as const;
+export type Section = (typeof SectionValues)[number];

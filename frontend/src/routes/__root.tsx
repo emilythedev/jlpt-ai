@@ -10,6 +10,9 @@ export const Route = createRootRoute({
         </Link>{' '}
         <Link to="/grammar" className="[&.active]:font-bold">
           文法
+        </Link>{' '}
+        <Link to="/revision" className="[&.active]:font-bold">
+          復習
         </Link>
       </div>
       <hr />
