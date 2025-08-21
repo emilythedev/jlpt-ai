@@ -1,8 +1,9 @@
 import QuestionCard from '@/components/QuestionCard';
 import { Button } from '@/components/ui/button';
 import { revisionQuizAtoms } from '@/lib/atoms';
+import { db } from '@/lib/db';
 import { useNavigate } from '@tanstack/react-router';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { getDefaultStore, useAtomValue, useSetAtom } from 'jotai';
 import { ChevronsRight } from 'lucide-react';
 import { useEffect, useState, type ComponentProps, type ReactNode } from 'react';
 
@@ -25,6 +26,17 @@ const NextQuestionButton = (props: ComponentProps<typeof Button>) => {
       <ChevronsRight />
     </Button>
   );
+};
+
+const updateStoredQuestionsFromRevisionResult = async () => {
+  const questionDataList = getDefaultStore().get(revisionQuizAtoms.getQuizAtom)
+    .questionStates
+    .map(q => q.questionData);
+  try {
+    await db.mc.bulkPut(questionDataList);
+  } catch (err) {
+    console.error('Failed to update stored questions:', err);
+  }
 };
 
 const {
@@ -59,8 +71,8 @@ const RevisionQuiz = () => {
   // if there are no more questions, navigate to the result page
   useEffect(() => {
     if (hasNoMoreQuestions) {
+      updateStoredQuestionsFromRevisionResult();
       navigate({ to: '/revision/result' });
-      return;
     }
   }, [hasNoMoreQuestions, navigate]);
 
