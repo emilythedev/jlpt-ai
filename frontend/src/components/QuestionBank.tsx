@@ -7,9 +7,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { revisionQuizAtoms } from '@/lib/atoms';
 import { db, type MultipleChoiceQuestionModel } from '@/lib/db';
 import { JLPTLevelValues, SectionValues, type JLPTLevel, type Section } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useNavigate } from '@tanstack/react-router';
+import { useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 
 type CollectionFilterQuery = Partial<Pick<MultipleChoiceQuestionModel, 'level' | 'section'>>;
@@ -90,8 +93,12 @@ const QuestionBankFilter = ({ className, onChanged }: QuestionBankFilterProps) =
   );
 };
 
+const { startNewQuizAtom } = revisionQuizAtoms;
+
 const QuestionBank = () => {
   const [questions, setQuestions] = useState<MultipleChoiceQuestionModel[]>([]);
+  const startNewQuiz = useSetAtom(startNewQuizAtom);
+  const navigate = useNavigate();
 
   // Fetch questions from db with filters
   const handleFilterChanged = (values: FilterForm) => {
@@ -113,6 +120,18 @@ const QuestionBank = () => {
       .then(setQuestions);
   };
 
+  const handleStartQuiz = async () => {
+    startNewQuiz(questions.map((question, i) => {
+      return {
+        id: question.id,
+        questionData: question,
+        sequence: i + 1,
+        answer: '',
+      };
+    }));
+    await navigate({ to: '/revision/start' });
+  };
+
   const handleRemove = async (id: number) => {
     await db.mc.delete(id);
     setQuestions(qs => qs.filter(q => q.id !== id));
@@ -123,7 +142,9 @@ const QuestionBank = () => {
       <h2 className="text-xl font-bold mb-8">保存された問題一覧</h2>
       <QuestionBankFilter className="w-full mb-16" onChanged={handleFilterChanged} />
 
-      <div className="space-y-6">
+      <Button className="w-full mb-6" onClick={handleStartQuiz}>復習をスタート！</Button>
+
+      <div className="space-y-4">
         {questions.length === 0 && (
           <Card>
             <CardContent className="text-gray-500 py-6">該当する問題がありません。</CardContent>
