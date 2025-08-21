@@ -29,10 +29,20 @@ type QuestionCardProps = {
   onAnswered?: (answer: string) => void;
   sequence: number;
   defaultValue?: string;
+
   children?: React.ReactNode;
+  className?: string;
 };
 
-const QuestionCard = ({ question, onAnswered, showResult, sequence, defaultValue, children }: QuestionCardProps) => {
+const QuestionCard = ({
+  question,
+  onAnswered,
+  showResult,
+  sequence,
+  defaultValue,
+  children,
+  className,
+}: QuestionCardProps) => {
   const [value, setValue] = React.useState<string>(defaultValue || '');
   const handleChange = (value: string) => {
     setValue(value);
@@ -45,7 +55,7 @@ const QuestionCard = ({ question, onAnswered, showResult, sequence, defaultValue
   }, [question, defaultValue])
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>{sequence}. {question.question}</CardTitle>
       </CardHeader>
