@@ -29,7 +29,21 @@ app.add_middleware(
 @app.get("/question", response_model=QuestionResponse)
 async def generate_jlpt_question(lv: JLPTLevel):
     try:
-        return await generate_grammar_mc(lv)
+        questions = await generate_grammar_mc(lv, c)
+        return questions[0]
+
+    except Exception as e:
+        print(f"Error generating question: {e}")
+        detail = str(e)
+        # Attempt to provide more context if JSON parsing failed
+        if "JSON" in detail or "value_error.missing" in detail or "validation error" in detail:
+            detail = f"AI response was not valid JSON or missing fields. Full error: {e}"
+        raise HTTPException(status_code=500, detail=f"Failed to generate question: {detail}")
+
+@app.get("/grammar_quiz", response_model=list[QuestionResponse])
+async def generate_grammar_quiz(lv: JLPTLevel, c: int = 1):
+    try:
+        return await generate_grammar_mc(lv, c)
 
     except Exception as e:
         print(f"Error generating question: {e}")

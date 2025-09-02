@@ -2,6 +2,7 @@ import os
 from pydantic import BaseModel, Field
 import google.generativeai as genai
 from typing import Literal
+import json
 
 # Configure Gemini API with your API key from environment variables
 try:
@@ -29,13 +30,13 @@ sample_response_json = QuestionResponse(
 # Define the allowed JLPT levels using Literal for type safety
 JLPTLevel = Literal['n1', 'n2', 'n3', 'n4', 'n5']
 
-async def generate_grammar_mc(level: JLPTLevel):
+async def generate_grammar_mc(level: JLPTLevel, count: int = 1):
     level_for_prompt = level.upper()
 
     prompt = f"""
-    JLPT {level_for_prompt}レベルの文法または語彙を使った日本語四択問題を1問、正解インデックスと簡潔な日本語の解説とともにJSON形式で生成。
+    JLPT {level_for_prompt}レベルの文法を使った日本語四択問題を{count}問、ランダムな順番の選択肢、正解、簡潔な日本語の解説とともにJSON形式で生成。
     他のテキストは不要。
-    例: {sample_response_json}
+    例: [{sample_response_json}]
     """
 
     response = model.generate_content(prompt)
@@ -47,6 +48,5 @@ async def generate_grammar_mc(level: JLPTLevel):
     elif text_response.startswith("```"):
         text_response = text_response.replace("```", "").strip()
 
-    question_data = QuestionResponse.model_validate_json(text_response)
-
-    return question_data
+    data_list = json.loads(text_response)
+    return [QuestionResponse.model_validate(item) for item in data_list]
