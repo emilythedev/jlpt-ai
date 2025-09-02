@@ -7,12 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { revisionQuizAtoms } from '@/lib/atoms';
 import { db, type MultipleChoiceQuestionModel } from '@/lib/db';
 import { JLPTLevelValues, SectionValues, type JLPTLevel, type Section } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { useNavigate } from '@tanstack/react-router';
-import { useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 
 type CollectionFilterQuery = Partial<Pick<MultipleChoiceQuestionModel, 'level' | 'section'>>;
@@ -93,12 +90,12 @@ const QuestionBankFilter = ({ className, onChanged }: QuestionBankFilterProps) =
   );
 };
 
-const { startNewQuizAtom } = revisionQuizAtoms;
+interface QuestionBankProps {
+  onRevisionStart: (questions: MultipleChoiceQuestionModel[]) => void;
+}
 
-const QuestionBank = () => {
+const QuestionBank = ({ onRevisionStart }: QuestionBankProps) => {
   const [questions, setQuestions] = useState<MultipleChoiceQuestionModel[]>([]);
-  const startNewQuiz = useSetAtom(startNewQuizAtom);
-  const navigate = useNavigate();
 
   // Fetch questions from db with filters
   const handleFilterChanged = (values: FilterForm) => {
@@ -120,16 +117,8 @@ const QuestionBank = () => {
       .then(setQuestions);
   };
 
-  const handleStartQuiz = async () => {
-    startNewQuiz(questions.map((question, i) => {
-      return {
-        id: question.id,
-        questionData: question,
-        sequence: i + 1,
-        answer: '',
-      };
-    }));
-    await navigate({ to: '/revision/start' });
+  const handleStartQuiz = () => {
+    onRevisionStart(questions);
   };
 
   const handleRemove = async (id: number) => {

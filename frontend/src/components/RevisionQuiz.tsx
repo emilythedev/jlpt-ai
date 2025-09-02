@@ -1,97 +1,70 @@
-import QuestionCard from '@/components/QuestionCard';
 import { Button } from '@/components/ui/button';
-import { revisionQuizAtoms } from '@/lib/atoms';
-import { db } from '@/lib/db';
-import { useNavigate } from '@tanstack/react-router';
-import { getDefaultStore, useAtomValue, useSetAtom } from 'jotai';
-import { ChevronsRight } from 'lucide-react';
-import { useEffect, useState, type ComponentProps, type ReactNode } from 'react';
+import type { QuestionRecordWithId } from '@/lib/types';
+import { useState } from 'react';
+import Quiz from './Quiz';
 
-const QuizTitle = ({ children }: { children?: ReactNode }) => {
-  return (
-    <div className="font-medium">{children}</div>
-  )
-};
+interface RevisionQuizProps {
+  questionRecords: QuestionRecordWithId[];
+  onReturn: () => void;
+}
 
-const QuizScore = ({ score }: { score: number }) => {
-  return (
-    <div className="font-medium">得点：{score}</div>
-  );
-};
+const RevisionQuiz = ({ questionRecords, onReturn }: RevisionQuizProps) => {
+  const [score, setScore] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
+  const [hasCompleted, setHasCompleted] = useState(false);
 
-const NextQuestionButton = (props: ComponentProps<typeof Button>) => {
-  return (
-    <Button {...props}>
-      次の問題へ
-      <ChevronsRight />
-    </Button>
-  );
-};
-
-const updateStoredQuestionsFromRevisionResult = async () => {
-  const questionDataList = getDefaultStore().get(revisionQuizAtoms.getQuizAtom)
-    .questionStates
-    .map(q => q.questionData);
-  try {
-    await db.mc.bulkPut(questionDataList);
-  } catch (err) {
-    console.error('Failed to update stored questions:', err);
-  }
-};
-
-const {
-  getScoreAtom,
-  getCurrentQuestionStateAtom,
-  answerQuestionAndNextAtom,
-  hasNoMoreQuestionsAtom,
-} = revisionQuizAtoms;
-
-const RevisionQuiz = () => {
-  const score = useAtomValue(getScoreAtom);
-  const questionState = useAtomValue(getCurrentQuestionStateAtom);
-  const answerQuestionAndNext = useSetAtom(answerQuestionAndNextAtom);
-  const [answer, setAnswer] = useState('');
-  const hasNoMoreQuestions = useAtomValue(hasNoMoreQuestionsAtom);
-  const navigate = useNavigate();
-
-  const handleNextQuestion = () => {
-    if (!answer) return;
-    const isCorrect = answer === questionState.questionData.question.correct_answer;
-    answerQuestionAndNext({
-      ...questionState,
-      answer,
-      questionData: {
-        ...questionState.questionData,
-        lastCorrectAt: isCorrect ? new Date() : undefined,
-      },
-    }, isCorrect ? 1 : 0);
-    setAnswer('');
+  const handleCompleted = (count: number) => {
+    setTotalQuestions(count);
+    setHasCompleted(true);
   };
 
-  // if there are no more questions, navigate to the result page
-  useEffect(() => {
-    if (hasNoMoreQuestions) {
-      updateStoredQuestionsFromRevisionResult();
-      navigate({ to: '/revision/result' });
-    }
-  }, [hasNoMoreQuestions, navigate]);
+  if (hasCompleted) {
+    return (
+      <div className="w-full max-w-2xl mx-auto text-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">復習完了！</h2>
+          <p className="text-muted-foreground">
+            復習の結果です。
+          </p>
+        </div>
+        <div className="mb-10 space-y-4">
+          <div className="text-6xl font-bold tracking-tighter">
+            {totalQuestions > 0
+              ? ((score / totalQuestions) * 100).toFixed(0)
+              : 0}
+            %
+          </div>
+          <p className="text-lg text-muted-foreground">
+            {totalQuestions}問中{score}問、正解しました。
+          </p>
+        </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+          <Button onClick={onReturn}>
+            保存した問題一覧に戻る
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full flex flex-col gap-4">
-      <QuizTitle>復習の問題</QuizTitle>
-      <QuizScore score={score} />
-      { questionState && questionState.questionData ? (
-        <QuestionCard
-          className="my-4"
-          question={questionState.questionData.question}
-          sequence={questionState.sequence}
-          onAnswered={setAnswer}
-        />
-      ) : (<QuestionCard.Skeleton className="my-4" />) }
-
-      <NextQuestionButton onClick={handleNextQuestion} />
+    <div className="w-full max-w-3xl mx-auto p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
+        <h1 className="text-2xl font-bold tracking-tight">
+          復習の問題
+        </h1>
+        <div className="text-xl font-semibold text-right">
+          得点：{' '}
+          <span className="text-primary font-bold tabular-nums">{score}</span>
+        </div>
+      </div>
+      <Quiz
+        questionRecords={questionRecords}
+        onScoreUpdated={(delta) => setScore((prev) => prev + delta)}
+        onCompleted={handleCompleted}
+      />
     </div>
-  )
+  );
 };
 
 export default RevisionQuiz;
