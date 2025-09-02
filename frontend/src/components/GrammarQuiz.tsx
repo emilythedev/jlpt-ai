@@ -1,102 +1,34 @@
-import QuestionCard from '@/components/QuestionCard';
-import SaveQuestionButton from '@/components/SaveQuestionButton';
+import Quiz from '@/components/Quiz';
 import { Button } from '@/components/ui/button';
-import { CardFooter } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import type { grammarQuizFetchOptions } from '@/lib/queries';
-import { type JLPTLevel, type QuestionRecord, type QuestionTopic } from '@/lib/types';
+import { type JLPTLevel, type Question, type QuestionRecord, type QuestionTopic } from '@/lib/types';
 import { Route } from '@/routes/grammar/$level';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { ChevronsRight } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type ComponentProps } from 'react';
 
-interface QuizProps {
+interface QuizWrapper extends Omit<ComponentProps<typeof Quiz>, 'questionRecords'> {
   topic: QuestionTopic,
   quizFetchOptions: ReturnType<typeof grammarQuizFetchOptions>;
-  onScoreUpdated?: (deltaScore: number) => void;
-  onCompleted?: (totalQuestions: number) => void;
 }
 
-const Quiz = ({
+const QuizWrapper = ({
   topic,
   quizFetchOptions,
-  onScoreUpdated,
-  onCompleted,
-}: QuizProps) => {
+  ...props
+}: QuizWrapper) => {
   const { data: questions } = useSuspenseQuery(quizFetchOptions);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answer, setAnswer] = useState('');
-  const [currentQuestionId, setCurrentQuestionId] = useState<number | undefined>();
-  const [currentQuestionData, setCurrentQuestionData] = useState<QuestionRecord | null>(null);
 
-  const totalQuestions = questions.length;
-  const sequence = currentIndex + 1;
-  const currentQuestion = questions[currentIndex];
-  const isLastQuestion = currentIndex + 1 >= totalQuestions;
-
-  const handleNextQuestion = () => {
-    setAnswer('');
-    setCurrentQuestionData(null);
-    setCurrentQuestionId(undefined);
-
-    if (isLastQuestion) {
-      onCompleted?.(totalQuestions);
-    } else {
-      setCurrentIndex((prev) => prev + 1);
-    }
-  };
-
-  const handleAnswered = (ans: string) => {
-    const isCorrect = currentQuestion.correct_answer === ans;
-    setAnswer(ans);
-
-    setCurrentQuestionData({
-      ...topic,
-      question: currentQuestion,
-      lastCorrectAt: isCorrect ? new Date() : undefined,
-    });
-
-    if (isCorrect) {
-      onScoreUpdated?.(1);
-    }
-  };
+  const questionRecords = questions.map((question: Question) => ({
+    question,
+    ...topic,
+  } as QuestionRecord));
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <p className="text-sm text-muted-foreground">
-          問題 {sequence} / {totalQuestions}
-        </p>
-        <Progress value={(sequence / totalQuestions) * 100} />
-      </div>
-      <QuestionCard
-        question={currentQuestion}
-        showResult={!!answer}
-        onAnswered={handleAnswered}
-        sequence={sequence}
-      >
-        { answer && (
-          <CardFooter className="flex-col gap-2 items-stretch text-muted-foreground text-sm">
-            {currentQuestion.explanation}
-          </CardFooter>
-        )}
-      </QuestionCard>
-
-      <div className="flex justify-end gap-4">
-        {currentQuestionData && (
-          <SaveQuestionButton
-            id={currentQuestionId}
-            onIdUpdated={setCurrentQuestionId}
-            questionData={currentQuestionData}
-          />
-        )}
-        <Button onClick={handleNextQuestion} disabled={!answer}>
-          <span>{isLastQuestion ? '完了' : '次へ'}</span>
-          <ChevronsRight className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
+    <Quiz
+      questionRecords={questionRecords}
+      {...props}
+    />
   );
 };
 
@@ -160,7 +92,7 @@ const GrammarQuiz = ({ level }: { level: JLPTLevel }) => {
           <span className="text-primary font-bold tabular-nums">{score}</span>
         </div>
       </div>
-      <Quiz
+      <QuizWrapper
         key={totalQuestions}
         topic={{ level, section: 'grammar' }}
         quizFetchOptions={quizFetchOptions}
