@@ -3,7 +3,7 @@ import { grammarQuizFetchOptions } from '@/lib/queries';
 import type { JLPTLevel } from '@/lib/types';
 import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/grammar/$level/')({
+export const Route = createFileRoute('/grammar/$level')({
   component: RouteComponent,
   beforeLoad: ({ params }) => {
     const { level } = params;
