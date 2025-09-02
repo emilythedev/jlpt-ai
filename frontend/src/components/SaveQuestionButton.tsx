@@ -8,9 +8,11 @@ interface SaveQuestionButtonProps {
   id?: number;
   questionData: QuestionFeedback;
   onIdUpdated: (id?: number) => void;
+
+  className?: string;
 }
 
-const SaveQuestionButton = ({ id, questionData, onIdUpdated }: SaveQuestionButtonProps) => {
+const SaveQuestionButton = ({ id, questionData, onIdUpdated, className }: SaveQuestionButtonProps) => {
   const isSaved = !!id;
   const [optimisticSaveState, setOptimisticSaveState] = useOptimistic(isSaved,
     (_, isSaved: boolean) => isSaved);
@@ -42,6 +44,7 @@ const SaveQuestionButton = ({ id, questionData, onIdUpdated }: SaveQuestionButto
   if (optimisticSaveState) {
     return (
       <Button
+        className={className}
         variant="ghost"
         onClick={handleUnsave}
       >
@@ -53,6 +56,8 @@ const SaveQuestionButton = ({ id, questionData, onIdUpdated }: SaveQuestionButto
 
   return (
     <Button
+      variant="outline"
+      className={className}
       onClick={handleSave}
     >
       <Bookmark />

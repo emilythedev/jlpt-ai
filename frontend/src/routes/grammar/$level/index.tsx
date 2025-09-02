@@ -1,26 +1,28 @@
 import GrammarQuiz from '@/components/GrammarQuiz';
-import { resetResultAtom } from '@/components/questionAtoms';
+import { grammarQuizFetchOptions } from '@/lib/queries';
 import type { JLPTLevel } from '@/lib/types';
 import { createFileRoute } from '@tanstack/react-router';
-import { useSetAtom } from 'jotai';
-import { useEffect } from 'react';
 
 export const Route = createFileRoute('/grammar/$level/')({
   component: RouteComponent,
-  loader: ({ params }) => {
+  beforeLoad: ({ params }) => {
+    const { level } = params;
     return {
-      level: params.level as JLPTLevel,
+      level: level as JLPTLevel,
+      quizFetchOptions: grammarQuizFetchOptions(level as JLPTLevel, 5),
     };
+  },
+  loader: ({ context: { queryClient, quizFetchOptions } }) => {
+    queryClient.prefetchQuery(quizFetchOptions);
   },
 })
 
 function RouteComponent() {
-  const { level } = Route.useParams();
-  const resetResult = useSetAtom(resetResultAtom);
+  const { level } = Route.useRouteContext();
 
-  useEffect(() => {
-    resetResult();
-  }, []);
-
-  return <GrammarQuiz level={level as JLPTLevel} />
+  return (
+    <GrammarQuiz
+      level={level as JLPTLevel}
+    />
+  );
 }
