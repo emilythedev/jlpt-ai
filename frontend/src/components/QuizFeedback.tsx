@@ -50,7 +50,7 @@ const QuizFeedback = ({ feedbacks }: QuizFeedbackProps) => {
 
               <SaveQuestionButton
                 id={id}
-                questionData={questionData}
+                questionRecord={questionData}
                 onIdUpdated={(id) => updateQuestionId(sequence, id)}
               />
             </CardFooter>

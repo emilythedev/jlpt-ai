@@ -1,18 +1,18 @@
 import { Button } from '@/components/ui/button';
 import { db } from '@/lib/db';
-import type { QuestionFeedback } from '@/lib/types';
+import type { QuestionRecord } from '@/lib/types';
 import { Bookmark, Check } from 'lucide-react';
 import { startTransition, useOptimistic } from 'react';
 
 interface SaveQuestionButtonProps {
   id?: number;
-  questionData: QuestionFeedback;
+  questionRecord: QuestionRecord;
   onIdUpdated: (id?: number) => void;
 
   className?: string;
 }
 
-const SaveQuestionButton = ({ id, questionData, onIdUpdated, className }: SaveQuestionButtonProps) => {
+const SaveQuestionButton = ({ id, questionRecord, onIdUpdated, className }: SaveQuestionButtonProps) => {
   const isSaved = !!id;
   const [optimisticSaveState, setOptimisticSaveState] = useOptimistic(isSaved,
     (_, isSaved: boolean) => isSaved);
@@ -21,7 +21,7 @@ const SaveQuestionButton = ({ id, questionData, onIdUpdated, className }: SaveQu
     startTransition(() => setOptimisticSaveState(true));
 
     try {
-      const id = await db.mc.add(questionData);
+      const id = await db.mc.add(questionRecord);
       onIdUpdated(id);
     } catch (err) {
       console.log(err);

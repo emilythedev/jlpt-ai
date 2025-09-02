@@ -59,7 +59,7 @@ const QuizResult = () => {
 
               <SaveQuestionButton
                 id={id}
-                questionData={questionData}
+                questionRecord={questionData}
                 onIdUpdated={(id) => updateQuestionId(sequence, id)}
               />
             </CardFooter>
