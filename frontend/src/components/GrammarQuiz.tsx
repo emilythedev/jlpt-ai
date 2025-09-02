@@ -1,4 +1,7 @@
+import QuestionCard from '@/components/QuestionCard';
+import SaveQuestionButton from '@/components/SaveQuestionButton';
 import { Button } from '@/components/ui/button';
+import { CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import type { grammarQuizFetchOptions } from '@/lib/queries';
 import { type JLPTLevel, type QuestionFeedback, type QuestionTopic } from '@/lib/types';
@@ -7,8 +10,6 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { ChevronsRight } from 'lucide-react';
 import { useState } from 'react';
-import QuestionCard from './QuestionCard';
-import SaveQuestionButton from './SaveQuestionButton';
 
 interface QuizProps {
   topic: QuestionTopic,
@@ -74,7 +75,14 @@ const Quiz = ({
         showResult={!!answer}
         onAnswered={handleAnswered}
         sequence={sequence}
-      />
+      >
+        { answer && (
+          <CardFooter className="flex-col gap-2 items-stretch text-muted-foreground text-sm">
+            {currentQuestion.explanation}
+          </CardFooter>
+        )}
+      </QuestionCard>
+
       <div className="flex justify-end gap-4">
         {currentQuestionData && (
           <SaveQuestionButton
