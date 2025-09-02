@@ -1,4 +1,4 @@
-import type { QuestionFeedback } from '@/lib/types';
+import type { QuestionRecord } from '@/lib/types';
 import Dexie, { type EntityTable } from 'dexie';
 
 interface BaseModel {
@@ -6,7 +6,7 @@ interface BaseModel {
   createdAt?: Date;
 }
 
-interface MultipleChoiceQuestionModel extends BaseModel, QuestionFeedback {}
+interface MultipleChoiceQuestionModel extends BaseModel, QuestionRecord {}
 
 const db = new Dexie('jlpt-ai-db') as Dexie & {
   mc: EntityTable<

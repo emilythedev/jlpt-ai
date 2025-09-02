@@ -13,9 +13,13 @@ export type QuestionTopic = {
   section: Section;
 };
 
-export type QuestionFeedback = QuestionTopic & {
+export type QuestionRecord = QuestionTopic & {
   question: Question;
   lastCorrectAt?: Date;
+};
+
+export type QuestionRecordWithId = QuestionRecord & {
+  id?: number;
 };
 
 export const SectionValues = [

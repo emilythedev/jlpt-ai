@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import type { grammarQuizFetchOptions } from '@/lib/queries';
-import { type JLPTLevel, type QuestionFeedback, type QuestionTopic } from '@/lib/types';
+import { type JLPTLevel, type QuestionRecord, type QuestionTopic } from '@/lib/types';
 import { Route } from '@/routes/grammar/$level';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
@@ -28,7 +28,7 @@ const Quiz = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answer, setAnswer] = useState('');
   const [currentQuestionId, setCurrentQuestionId] = useState<number | undefined>();
-  const [currentQuestionData, setCurrentQuestionData] = useState<QuestionFeedback | null>(null);
+  const [currentQuestionData, setCurrentQuestionData] = useState<QuestionRecord | null>(null);
 
   const totalQuestions = questions.length;
   const sequence = currentIndex + 1;

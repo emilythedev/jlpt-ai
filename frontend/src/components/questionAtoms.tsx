@@ -1,10 +1,10 @@
-import type { QuestionFeedback } from '@/lib/types';
+import type { QuestionRecord } from '@/lib/types';
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 
 export type QuestionAtomType = {
   id?: number;
-  questionData: QuestionFeedback,
+  questionData: QuestionRecord,
   sequence: number;
   answer: string;
 };
