@@ -86,7 +86,7 @@ const QuestionCard = ({
   );
 };
 
-QuestionCard.Skeleton = ({ className }: { className?: string }) => (
+QuestionCard.Loading = ({ className }: { className?: string }) => (
   <Card className={cn(className, 'animate-pulse')}>
     <CardHeader>
       <CardTitle className="h-6 bg-gray-200 rounded w-full"></CardTitle>

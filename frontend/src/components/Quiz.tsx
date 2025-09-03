@@ -3,6 +3,7 @@ import SaveQuestionButton from '@/components/SaveQuestionButton';
 import { Button } from '@/components/ui/button';
 import { CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/lib/db';
 import { type QuestionRecord, type QuestionRecordWithId } from '@/lib/types';
 import { ChevronsRight } from 'lucide-react';
@@ -112,5 +113,19 @@ const Quiz = ({
     </div>
   );
 };
+
+Quiz.Loading = () => (
+  <div className="space-y-6">
+    <div className="space-y-2">
+      <Skeleton className="h-5 w-32" />
+      <Skeleton className="h-2 w-full" />
+    </div>
+    <QuestionCard.Loading />
+    <div className="flex justify-end gap-4">
+      <Skeleton className="h-10 w-32" />
+      <Skeleton className="h-10 w-24" />
+    </div>
+  </div>
+);
 
 export default Quiz;

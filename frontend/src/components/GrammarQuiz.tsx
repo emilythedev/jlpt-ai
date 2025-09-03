@@ -5,7 +5,7 @@ import { type JLPTLevel, type Question, type QuestionRecord, type QuestionTopic 
 import { Route } from '@/routes/grammar/$level';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { useState, type ComponentProps } from 'react';
+import { Suspense, useState, type ComponentProps } from 'react';
 
 interface QuizWrapper extends Omit<ComponentProps<typeof Quiz>, 'questionRecords'> {
   topic: QuestionTopic,
@@ -92,13 +92,15 @@ const GrammarQuiz = ({ level }: { level: JLPTLevel }) => {
           <span className="text-primary font-bold tabular-nums">{score}</span>
         </div>
       </div>
-      <QuizWrapper
-        key={totalQuestions}
-        topic={{ level, section: 'grammar' }}
-        quizFetchOptions={quizFetchOptions}
-        onScoreUpdated={(delta) => setScore((prev) => prev + delta)}
-        onCompleted={handleCompleted}
-      />
+      <Suspense fallback={<Quiz.Loading />}>
+        <QuizWrapper
+          key={totalQuestions}
+          topic={{ level, section: 'grammar' }}
+          quizFetchOptions={quizFetchOptions}
+          onScoreUpdated={(delta) => setScore((prev) => prev + delta)}
+          onCompleted={handleCompleted}
+        />
+      </Suspense>
     </div>
   );
 };
