@@ -3,6 +3,7 @@ import SaveQuestionButton from '@/components/SaveQuestionButton';
 import { Button } from '@/components/ui/button';
 import { CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { db } from '@/lib/db';
 import { type QuestionRecord, type QuestionRecordWithId } from '@/lib/types';
 import { ChevronsRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -11,6 +12,14 @@ interface QuizProps {
   questionRecords: QuestionRecordWithId[];
   onScoreUpdated?: (deltaScore: number) => void;
   onCompleted?: (totalQuestions: number) => void;
+}
+
+const updateQuestionRecord = async (questionRecord: QuestionRecordWithId) => {
+  try {
+    await db.mc.put(questionRecord);
+  } catch (err) {
+    console.error('Failed to update stored questions:', err);
+  }
 }
 
 const Quiz = ({
@@ -45,18 +54,25 @@ const Quiz = ({
     }
   };
 
-  const handleAnswered = (ans: string) => {
-    const isCorrect = question.correct_answer === ans;
+  const handleAnswered = async (ans: string) => {
     setAnswer(ans);
 
-    setNewQuestionRecord({
-      ...currentQuestionRecord,
-      lastCorrectAt: isCorrect ? new Date() : undefined,
-    });
-
+    const isCorrect = question.correct_answer === ans;
     if (isCorrect) {
       onScoreUpdated?.(1);
     }
+
+    // prepare record to store into db
+    const newRecord = {
+      ...currentQuestionRecord,
+      lastCorrectAt: isCorrect ? new Date() : undefined,
+    }
+
+    if (typeof currentQuestionId !== 'undefined') {
+      updateQuestionRecord(newRecord);
+    }
+
+    setNewQuestionRecord(newRecord);
   };
 
   return (
