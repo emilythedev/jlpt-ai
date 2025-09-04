@@ -12,13 +12,14 @@ interface LevelSelectorProps {
   value?: JLPTLevel;
 }
 
+const sortedJLPTLevelValues = JLPTLevelValues.slice().reverse();
+
 const LevelSelector: React.FC<LevelSelectorProps> = ({ onChange, value }) => {
   return (
     <div className="flex flex-wrap gap-2">
-      {JLPTLevelValues.map((level) => (
+      {sortedJLPTLevelValues.map((level) => (
         <Button
           key={level}
-          size="lg"
           variant={value === level ? 'default' : 'secondary'}
           onClick={() => onChange(level)}
         >
@@ -42,7 +43,6 @@ const QuestionCountSelector: React.FC<QuestionCountSelectorProps> = ({ onChange,
       {questionCounts.map((count) => (
         <Button
           key={count}
-          size="lg"
           variant={value === count ? 'default' : 'secondary'}
           onClick={() => onChange(count)}
         >
@@ -67,16 +67,17 @@ function RouteComponent() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 md:p-6 space-y-8">
+    <div className="w-full max-w-2xl mx-auto p-4 md:p-6 space-y-8 flex flex-col items-center text-center">
+      <h1 className="text-2xl font-bold tracking-tight">文法クイズ</h1>
       <div className="space-y-4">
-        <h2 className="font-medium text-lg">1. JLPTレベルを選択：</h2>
+        <h2 className="font-medium text-lg">JLPTレベル</h2>
         <LevelSelector onChange={setLevel} value={level} />
       </div>
       <div className="space-y-4">
-        <h2 className="font-medium text-lg">2. 問題数を選択：</h2>
+        <h2 className="font-medium text-lg">問題数</h2>
         <QuestionCountSelector onChange={setCount} value={count} />
       </div>
-      <Button size="lg" className="w-full" onClick={handleStart}>
+      <Button size="lg" className="mt-8" onClick={handleStart}>
         クイズをスタート！
       </Button>
     </div>
