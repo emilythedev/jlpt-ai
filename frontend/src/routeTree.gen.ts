@@ -9,19 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RevisionRouteImport } from './routes/revision'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as RevisionIndexRouteImport } from './routes/revision/index'
 import { Route as GrammarIndexRouteImport } from './routes/grammar/index'
 import { Route as GrammarLevelRouteImport } from './routes/grammar/$level'
 
+const RevisionRoute = RevisionRouteImport.update({
+  id: '/revision',
+  path: '/revision',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RevisionIndexRoute = RevisionIndexRouteImport.update({
-  id: '/revision/',
-  path: '/revision/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GrammarIndexRoute = GrammarIndexRouteImport.update({
@@ -37,52 +37,52 @@ const GrammarLevelRoute = GrammarLevelRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/revision': typeof RevisionRoute
   '/grammar/$level': typeof GrammarLevelRoute
   '/grammar': typeof GrammarIndexRoute
-  '/revision': typeof RevisionIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/revision': typeof RevisionRoute
   '/grammar/$level': typeof GrammarLevelRoute
   '/grammar': typeof GrammarIndexRoute
-  '/revision': typeof RevisionIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/revision': typeof RevisionRoute
   '/grammar/$level': typeof GrammarLevelRoute
   '/grammar/': typeof GrammarIndexRoute
-  '/revision/': typeof RevisionIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/grammar/$level' | '/grammar' | '/revision'
+  fullPaths: '/' | '/revision' | '/grammar/$level' | '/grammar'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/grammar/$level' | '/grammar' | '/revision'
-  id: '__root__' | '/' | '/grammar/$level' | '/grammar/' | '/revision/'
+  to: '/' | '/revision' | '/grammar/$level' | '/grammar'
+  id: '__root__' | '/' | '/revision' | '/grammar/$level' | '/grammar/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RevisionRoute: typeof RevisionRoute
   GrammarLevelRoute: typeof GrammarLevelRoute
   GrammarIndexRoute: typeof GrammarIndexRoute
-  RevisionIndexRoute: typeof RevisionIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/revision': {
+      id: '/revision'
+      path: '/revision'
+      fullPath: '/revision'
+      preLoaderRoute: typeof RevisionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/revision/': {
-      id: '/revision/'
-      path: '/revision'
-      fullPath: '/revision'
-      preLoaderRoute: typeof RevisionIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/grammar/': {
@@ -104,9 +104,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RevisionRoute: RevisionRoute,
   GrammarLevelRoute: GrammarLevelRoute,
   GrammarIndexRoute: GrammarIndexRoute,
-  RevisionIndexRoute: RevisionIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -4,7 +4,7 @@ import type { QuestionRecordWithId } from '@/lib/types';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 
-export const Route = createFileRoute('/revision/')({
+export const Route = createFileRoute('/revision')({
   component: RouteComponent,
 });
 
