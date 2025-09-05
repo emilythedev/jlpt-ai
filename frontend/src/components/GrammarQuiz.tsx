@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import type { grammarQuizFetchOptions } from '@/lib/queries';
 import { type JLPTLevel, type Question, type QuestionRecord, type QuestionTopic } from '@/lib/types';
 import { Route } from '@/routes/grammar/$level';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { Suspense, useState, type ComponentProps } from 'react';
 
@@ -33,6 +33,7 @@ const QuizWrapper = ({
 };
 
 const GrammarQuiz = ({ level }: { level: JLPTLevel }) => {
+  const queryClient = useQueryClient();
   const { quizFetchOptions } = Route.useRouteContext();
   const [score, setScore] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
@@ -41,6 +42,7 @@ const GrammarQuiz = ({ level }: { level: JLPTLevel }) => {
   const handleCompleted = (count: number) => {
     setTotalQuestions(count);
     setHasCompleted(true);
+    queryClient.removeQueries(quizFetchOptions);
   };
 
   const handleRestart = () => {
