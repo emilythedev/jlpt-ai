@@ -4,7 +4,7 @@ load_dotenv()
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from generator import generate_grammar_mc, QuestionResponse, JLPTLevel
+from generator import generate_grammar_mc, QuestionResponse, JLPTLevel, JsonParsingError
 
 # Load environment variables from .env file
 load_dotenv()
@@ -29,29 +29,27 @@ app.add_middleware(
 @app.get("/question", response_model=QuestionResponse)
 async def generate_jlpt_question(lv: JLPTLevel):
     try:
-        questions = await generate_grammar_mc(lv, c)
-        return questions[0]
-
+        questions = await generate_grammar_mc(lv)
+        if questions:
+            return questions[0]
+        raise HTTPException(status_code=500, detail="AI failed to generate a question.")
+    except JsonParsingError as e:
+        print(f"JsonParsingError: {e.response_text}")
+        raise HTTPException(status_code=500, detail=f"AI response was not valid JSON or missing fields.")
     except Exception as e:
         print(f"Error generating question: {e}")
-        detail = str(e)
-        # Attempt to provide more context if JSON parsing failed
-        if "JSON" in detail or "value_error.missing" in detail or "validation error" in detail:
-            detail = f"AI response was not valid JSON or missing fields. Full error: {e}"
-        raise HTTPException(status_code=500, detail=f"Failed to generate question: {detail}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate question: {e}")
 
 @app.get("/grammar_quiz", response_model=list[QuestionResponse])
 async def generate_grammar_quiz(lv: JLPTLevel, c: int = 1):
     try:
         return await generate_grammar_mc(lv, c)
-
+    except JsonParsingError as e:
+        print(f"JsonParsingError: {e.response_text}")
+        raise HTTPException(status_code=500, detail=f"AI response was not valid JSON or missing fields.")
     except Exception as e:
         print(f"Error generating question: {e}")
-        detail = str(e)
-        # Attempt to provide more context if JSON parsing failed
-        if "JSON" in detail or "value_error.missing" in detail or "validation error" in detail:
-            detail = f"AI response was not valid JSON or missing fields. Full error: {e}"
-        raise HTTPException(status_code=500, detail=f"Failed to generate question: {detail}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate question: {e}")
 
 if __name__ == "__main__":
     import uvicorn

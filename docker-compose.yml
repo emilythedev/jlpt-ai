@@ -9,3 +9,5 @@ services:
       - ./backend:/app/backend
     ports:
       - "8000:8000"
+    environment:
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}

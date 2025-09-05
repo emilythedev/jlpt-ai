@@ -1,31 +1,26 @@
 import os
 from pydantic import BaseModel, Field
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from typing import Literal
 import json
 
-# Configure Gemini API with your API key from environment variables
-try:
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-except KeyError:
-    raise RuntimeError("GEMINI_API_KEY environment variable not set.")
+client = genai.Client()
 
 GEMINI_MODEL_ID = os.getenv("GEMINI_MODEL_ID", "gemini-1.5-flash")
-model = genai.GenerativeModel(GEMINI_MODEL_ID)
+
+class JsonParsingError(Exception):
+    """Custom exception for errors when parsing JSON from the AI model."""
+    def __init__(self, response_text: str):
+        super().__init__('Failed to parse JSON response')
+        self.response_text = response_text
 
 # Pydantic models for request and response
 class QuestionResponse(BaseModel):
-    question: str
-    options: list[str]
-    correct_answer: str
-    explanation: str
-
-sample_response_json = QuestionResponse(
-    question="先生のご指導（　　）、試験に合格できました。",
-    options=["のおかげで", "なせいで", "のおかげに", "にもかかわらず"],
-    correct_answer="のおかげで",
-    explanation="「～のおかげで」は、恩恵や良い結果の原因を表す表現です。"
-).model_dump_json()
+    question: str = Field(..., example="先生のご指導（　　）、試験に合格できました。", description="問題文")
+    options: list[str] = Field(..., example=["のおかげで", "のせいで", "のおかげに", "にもかかわらず"], description="選択肢")
+    correct_answer: str = Field(..., example="のおかげで", description="正解")
+    explanation: str = Field(..., example="「～のおかげで」は、恩恵や良い結果の原因を表す表現です。", description="解説")
 
 # Define the allowed JLPT levels using Literal for type safety
 JLPTLevel = Literal['n1', 'n2', 'n3', 'n4', 'n5']
@@ -41,18 +36,19 @@ async def generate_grammar_mc(level: JLPTLevel, count: int = 1):
     - 選択肢は互いに重複しないこと。
     - 正解は1つだけであること。
     - 各問題には、なぜその答えが正しいのかを説明する簡潔な日本語の解説を含めること。
-    - JSON形式のみを返し、他のテキストは含めないこと。
-    - JSONの形式例: [{sample_response_json}]
     """
+    response = client.models.generate_content(
+        model=GEMINI_MODEL_ID,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            response_mime_type='application/json',
+            response_schema=list[QuestionResponse]
+        )
+    )
 
-    response = model.generate_content(prompt)
-    text_response = response.text.strip()
+    questions: list[QuestionResponse] = response.parsed
 
-    # Remove markdown code block wrappers if they appear, as we want pure JSON
-    if text_response.startswith("```json"):
-        text_response = text_response.replace("```json", "").replace("```", "").strip()
-    elif text_response.startswith("```"):
-        text_response = text_response.replace("```", "").strip()
+    if not questions:
+        raise JsonParsingError(response.text)
 
-    data_list = json.loads(text_response)
-    return [QuestionResponse.model_validate(item) for item in data_list]
+    return questions
