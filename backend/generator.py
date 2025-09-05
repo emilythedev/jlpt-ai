@@ -33,10 +33,16 @@ JLPTLevel = Literal['n1', 'n2', 'n3', 'n4', 'n5']
 async def generate_grammar_mc(level: JLPTLevel, count: int = 1):
     level_for_prompt = level.upper()
 
-    prompt = f"""
-    JLPT {level_for_prompt}レベルの文法を使った日本語四択問題を{count}問、ランダムな順番の選択肢、正解、簡潔な日本語の解説とともにJSON形式で生成。
-    他のテキストは不要。
-    例: [{sample_response_json}]
+    prompt = f"""あなたは日本語を外国人に教えるネイティブの日本語教師です。
+    JLPTのシラバスに基づき、{level_for_prompt}レベルの文法に関する多肢選択問題を{count}問、JSON形式で生成してください。
+
+    以下の要件を厳守してください：
+    - 各問題には4つの選択肢を設けること。
+    - 選択肢は互いに重複しないこと。
+    - 正解は1つだけであること。
+    - 各問題には、なぜその答えが正しいのかを説明する簡潔な日本語の解説を含めること。
+    - JSON形式のみを返し、他のテキストは含めないこと。
+    - JSONの形式例: [{sample_response_json}]
     """
 
     response = model.generate_content(prompt)
