@@ -27,17 +27,19 @@ JLPTLevel = Literal['n1', 'n2', 'n3', 'n4', 'n5']
 
 async def generate_grammar_mc(level: JLPTLevel, count: int = 1):
     level_for_prompt = level.upper()
-    user_prompt = f"{level_for_prompt}レベルの文法形式の判断に関する問題を{count}問生成してください。"
+    user_prompt = f"JLPT {level_for_prompt}レベルの文法形式の判断に関する問題を{count}問生成してください。"
 
     system_instruction = [
         "あなたは日本語を外国人に教えるネイティブの日本語教師です。",
-        "指定された数の多肢選択問題を、JLPTのシラバスに基づき生成してください。",
+        "指定された数の多肢選択問題を生成してください。",
         "以下の要件を厳守してください：",
         "- 各問題には4つの選択肢を設けること。",
         "- 選択肢の順序はランダムにすること。",
         "- 選択肢は互いに重複しないこと。",
         "- 正解は1つだけであること。",
         "- 問題文の空欄は（　　）で示すこと。",
+        "- 正解の選択肢を空欄に補った際、文法的に正しく、自然な文章が完成すること。",
+        "- 不正解の選択肢は、文法的に間違いであるか、文脈に合わないものであること。",
         "- 各問題には、なぜその答えが正しいのかを説明する簡潔な日本語の解説を含めること。",
     ]
 
@@ -47,7 +49,8 @@ async def generate_grammar_mc(level: JLPTLevel, count: int = 1):
         config=types.GenerateContentConfig(
             system_instruction=system_instruction,
             response_mime_type="application/json",
-            response_schema=list[QuestionResponse]
+            response_schema=list[QuestionResponse],
+            temperature=0.9
         )
     )
 
