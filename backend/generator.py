@@ -27,21 +27,26 @@ JLPTLevel = Literal['n1', 'n2', 'n3', 'n4', 'n5']
 
 async def generate_grammar_mc(level: JLPTLevel, count: int = 1):
     level_for_prompt = level.upper()
+    user_prompt = f"{level_for_prompt}レベルの文法形式の判断に関する問題を{count}問生成してください。"
 
-    prompt = f"""あなたは日本語を外国人に教えるネイティブの日本語教師です。
-    JLPTのシラバスに基づき、{level_for_prompt}レベルの文法に関する多肢選択問題を{count}問、JSON形式で生成してください。
+    system_instruction = [
+        "あなたは日本語を外国人に教えるネイティブの日本語教師です。",
+        "指定された数の多肢選択問題を、JLPTのシラバスに基づき生成してください。",
+        "以下の要件を厳守してください：",
+        "- 各問題には4つの選択肢を設けること。",
+        "- 選択肢の順序はランダムにすること。",
+        "- 選択肢は互いに重複しないこと。",
+        "- 正解は1つだけであること。",
+        "- 問題文の空欄は（　　）で示すこと。",
+        "- 各問題には、なぜその答えが正しいのかを説明する簡潔な日本語の解説を含めること。",
+    ]
 
-    以下の要件を厳守してください：
-    - 各問題には4つの選択肢を設けること。
-    - 選択肢は互いに重複しないこと。
-    - 正解は1つだけであること。
-    - 各問題には、なぜその答えが正しいのかを説明する簡潔な日本語の解説を含めること。
-    """
     response = client.models.generate_content(
         model=GEMINI_MODEL_ID,
-        contents=prompt,
+        contents=user_prompt,
         config=types.GenerateContentConfig(
-            response_mime_type='application/json',
+            system_instruction=system_instruction,
+            response_mime_type="application/json",
             response_schema=list[QuestionResponse]
         )
     )
