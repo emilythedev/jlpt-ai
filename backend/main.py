@@ -2,7 +2,8 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException
+from typing import Annotated
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from generator import generate_grammar_mc, QuestionResponse, JLPTLevel, JsonParsingError
 
@@ -41,9 +42,13 @@ async def generate_jlpt_question(lv: JLPTLevel):
         raise HTTPException(status_code=500, detail=f"Failed to generate question: {e}")
 
 @app.get("/grammar_quiz", response_model=list[QuestionResponse])
-async def generate_grammar_quiz(lv: JLPTLevel, c: int = 1):
+async def generate_grammar_quiz(
+    lv: Annotated[JLPTLevel],
+    c: Annotated[int, Query(ge=1, le=50)] = 1,
+    scp: Annotated[str | None, Query()] = None,
+):
     try:
-        return await generate_grammar_mc(lv, c)
+        return await generate_grammar_mc(lv, c, scp)
     except JsonParsingError as e:
         print(f"JsonParsingError: {e.response_text}")
         raise HTTPException(status_code=500, detail=f"AI response was not valid JSON or missing fields.")

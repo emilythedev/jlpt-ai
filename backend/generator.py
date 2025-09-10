@@ -25,9 +25,12 @@ class QuestionResponse(BaseModel):
 # Define the allowed JLPT levels using Literal for type safety
 JLPTLevel = Literal['n1', 'n2', 'n3', 'n4', 'n5']
 
-async def generate_grammar_mc(level: JLPTLevel, count: int = 1):
+async def generate_grammar_mc(level: JLPTLevel, count: int = 1, grammar_scope: str | None = None):
     level_for_prompt = level.upper()
-    user_prompt = f"JLPT {level_for_prompt}レベルの文法に関する問題を{count}問生成してください。"
+    user_prompt = f"JLPT {level_for_prompt}レベルの文法問題を{count}問生成してください。"
+
+    if grammar_scope:
+        user_prompt += f"特に「{grammar_scope}」に関する文法に焦点を当ててください。"
 
     system_instruction = [
         "あなたは日本語を外国人に教えるネイティブの日本語教師です。",
