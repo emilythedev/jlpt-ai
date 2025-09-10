@@ -3,7 +3,6 @@ from pydantic import BaseModel, Field
 from google import genai
 from google.genai import types
 from typing import Literal
-import json
 
 client = genai.Client()
 
@@ -15,12 +14,12 @@ class JsonParsingError(Exception):
         super().__init__('Failed to parse JSON response')
         self.response_text = response_text
 
-# Pydantic models for request and response
+# Pydantic models for response
 class QuestionResponse(BaseModel):
-    question: str = Field(..., example="先生のご指導（　　）、試験に合格できました。", description="問題文")
-    options: list[str] = Field(..., example=["のおかげで", "のせいで", "のおかげに", "にもかかわらず"], description="選択肢")
-    correct_answer: str = Field(..., example="のおかげで", description="正解")
-    explanation: str = Field(..., example="「～のおかげで」は、恩恵や良い結果の原因を表す表現です。", description="解説")
+    question: str = Field(..., description="問題文", examples=["昨日は熱があった（　　）、会社を休みました。"])
+    options: list[str] = Field(..., description="選択肢", examples=[["ので", "のに", "ても", "ながら"]])
+    correct_answer: str = Field(..., description="正解", examples=["ので"])
+    explanation: str = Field(..., description="解説", examples=["「ので」は理由や原因を表す接続助詞です。"])
 
 # Define the allowed JLPT levels using Literal for type safety
 JLPTLevel = Literal['n1', 'n2', 'n3', 'n4', 'n5']

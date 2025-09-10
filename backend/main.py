@@ -43,9 +43,9 @@ async def generate_jlpt_question(lv: JLPTLevel):
 
 @app.get("/grammar_quiz", response_model=list[QuestionResponse])
 async def generate_grammar_quiz(
-    lv: Annotated[JLPTLevel],
-    c: Annotated[int, Query(ge=1, le=50)] = 1,
-    scp: Annotated[str | None, Query()] = None,
+    lv: Annotated[JLPTLevel, Query(description="JLPT level")],
+    c: Annotated[int, Query(ge=1, le=50, description="Number of questions")] = 1,
+    scp: Annotated[str | None, Query(description="Grammar scope")] = None,
 ):
     try:
         return await generate_grammar_mc(lv, c, scp)
