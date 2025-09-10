@@ -52,9 +52,9 @@ async def generate_jlpt_question(lv: JLPTLevel):
 
 @app.get("/grammar_quiz", response_model=list[QuestionResponse])
 async def generate_grammar_quiz(
-    lv: Annotated[JLPTLevel, Query(description="JLPT level")],
-    c: Annotated[int, Query(ge=1, le=50, description="Number of questions")] = 1,
-    scp: Annotated[str | None, Query(description="Grammar scope")] = None,
+    lv: Annotated[JLPTLevel, Query(description="JLPT level", example="n4")],
+    c: Annotated[int, Query(ge=1, le=50, description="Number of questions", example=1)] = 1,
+    scp: Annotated[str | None, Query(description="Grammar scope", example="ので")] = None,
 ):
     return await generate_grammar_mc(lv, c, scp)
 
