@@ -7,6 +7,7 @@ import { z } from 'zod';
 
 const quizSearchSchema = z.object({
   count: fallback(z.number().min(1).max(20), 1).default(1),
+  scope: fallback(z.string(), '').default(''),
 });
 
 export const Route = createFileRoute('/grammar_/$level')({
@@ -14,11 +15,11 @@ export const Route = createFileRoute('/grammar_/$level')({
   validateSearch: zodValidator(quizSearchSchema),
   beforeLoad: ({ params, search }) => {
     const { level } = params;
-    const { count } = search;
+    const { count, scope } = search;
 
     return {
       level: level as JLPTLevel,
-      quizFetchOptions: grammarQuizFetchOptions(level as JLPTLevel, count),
+      quizFetchOptions: grammarQuizFetchOptions(level as JLPTLevel, count, scope),
     };
   },
   loader: ({ context: { queryClient, quizFetchOptions } }) => {
