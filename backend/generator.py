@@ -1,5 +1,7 @@
 import os
 from pydantic import BaseModel, Field
+from pydantic.json_schema import GenerateJsonSchema
+from pydantic.type_adapter import TypeAdapter
 from google import genai
 from google.genai import types
 from typing import Literal
@@ -14,12 +16,21 @@ class JsonParsingError(Exception):
         super().__init__('Failed to parse JSON response')
         self.response_text = response_text
 
+class GoogleCompatibleSchemaGenerator(GenerateJsonSchema):
+    def generate_inner(self, schema): # pyright: ignore[reportMissingParameterType]
+        json_schema = super().generate_inner(schema)
+        if 'examples' in json_schema:
+            del json_schema['examples']
+        return json_schema
+
 # Pydantic models for response
 class QuestionResponse(BaseModel):
     question: str = Field(..., description="問題文", examples=["昨日は熱があった（　　）、会社を休みました。"])
     options: list[str] = Field(..., description="選択肢", examples=[["ので", "のに", "ても", "ながら"]])
     correct_answer: str = Field(..., description="正解", examples=["ので"])
     explanation: str = Field(..., description="解説", examples=["「ので」は理由や原因を表す接続助詞です。"])
+
+QuestionResponseList = TypeAdapter(list[QuestionResponse])
 
 # Define the allowed JLPT levels using Literal for type safety
 JLPTLevel = Literal['n1', 'n2', 'n3', 'n4', 'n5']
@@ -51,14 +62,13 @@ async def generate_grammar_mc(level: JLPTLevel, count: int = 1, grammar_scope: s
         config=types.GenerateContentConfig(
             system_instruction=system_instruction,
             response_mime_type="application/json",
-            response_schema=list[QuestionResponse],
+            response_schema=QuestionResponseList.json_schema(schema_generator=GoogleCompatibleSchemaGenerator),
             temperature=0.9
         )
     )
 
-    questions: list[QuestionResponse] = response.parsed
-
-    if not questions:
-        raise JsonParsingError(response.text)
-
-    return questions
+    if response.parsed is not None:
+        questions: list[QuestionResponse] = response.parsed # pyright: ignore[reportAssignmentType]
+        return questions
+    else:
+        raise JsonParsingError(response.text if response.text is not None else 'Empty response.')
