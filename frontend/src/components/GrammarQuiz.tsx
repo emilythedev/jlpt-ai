@@ -2,9 +2,8 @@ import Quiz from '@/components/Quiz';
 import { Button } from '@/components/ui/button';
 import type { grammarQuizFetchOptions } from '@/lib/queries';
 import { type JLPTLevel, type Question, type QuestionRecord, type QuestionTopic } from '@/lib/types';
-import { Route } from '@/routes/grammar/$level';
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
+import { Link, useRouteContext } from '@tanstack/react-router';
 import { Suspense, useState, type ComponentProps } from 'react';
 
 interface QuizWrapper extends Omit<ComponentProps<typeof Quiz>, 'questionRecords'> {
@@ -34,7 +33,7 @@ const QuizWrapper = ({
 
 const GrammarQuiz = ({ level }: { level: JLPTLevel }) => {
   const queryClient = useQueryClient();
-  const { quizFetchOptions } = Route.useRouteContext();
+  const { quizFetchOptions } = useRouteContext({ from: '/grammar_/$level' });
   const [score, setScore] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [hasCompleted, setHasCompleted] = useState(false);
@@ -76,7 +75,7 @@ const GrammarQuiz = ({ level }: { level: JLPTLevel }) => {
             もう一度挑戦
           </Button>
           <Button asChild>
-            <Link to="/grammar">レベル選択に戻る</Link>
+            <Link to="/">レベル選択に戻る</Link>
           </Button>
         </div>
       </div>

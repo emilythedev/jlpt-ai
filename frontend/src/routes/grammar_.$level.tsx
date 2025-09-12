@@ -9,7 +9,7 @@ const quizSearchSchema = z.object({
   count: fallback(z.number().min(1).max(20), 1).default(1),
 });
 
-export const Route = createFileRoute('/grammar/$level')({
+export const Route = createFileRoute('/grammar_/$level')({
   component: RouteComponent,
   validateSearch: zodValidator(quizSearchSchema),
   beforeLoad: ({ params, search }) => {

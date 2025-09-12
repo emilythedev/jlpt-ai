@@ -9,10 +9,7 @@ export const Route = createRootRouteWithContext<{
     <>
       <div className="p-2 flex gap-2">
         <Link to="/" className="[&.active]:font-bold">
-          Home
-        </Link>{' '}
-        <Link to="/grammar" className="[&.active]:font-bold">
-          文法
+          クイズ
         </Link>{' '}
         <Link to="/revision" className="[&.active]:font-bold">
           復習

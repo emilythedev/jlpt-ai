@@ -1,11 +1,7 @@
 import { Button } from '@/components/ui/button';
-import { JLPTLevelValues, type JLPTLevel } from '@/lib/types';
-import { createFileRoute } from '@tanstack/react-router';
+import { type JLPTLevel, JLPTLevelValues } from '@/lib/types';
+import { useRouter } from '@tanstack/react-router';
 import { useState } from 'react';
-
-export const Route = createFileRoute('/grammar/')({
-  component: RouteComponent,
-});
 
 interface LevelSelectorProps {
   onChange: (level: JLPTLevel) => void;
@@ -53,13 +49,13 @@ const QuestionCountSelector: React.FC<QuestionCountSelectorProps> = ({ onChange,
   );
 };
 
-function RouteComponent() {
-  const navigate = Route.useNavigate();
+function QuizSetup() {
+  const router = useRouter();
   const [level, setLevel] = useState<JLPTLevel>('n5');
   const [count, setCount] = useState(5);
 
   const handleStart = () => {
-    navigate({
+    router.navigate({
       to: '/grammar/$level',
       params: { level },
       search: { count },
@@ -83,3 +79,5 @@ function RouteComponent() {
     </div>
   );
 }
+
+export default QuizSetup
