@@ -26,7 +26,6 @@
     "clsx": "^2.1.1",
     "dexie": "^4.0.11",
     "dexie-react-hooks": "^1.1.7",
-    "jotai": "^2.13.0",
     "lucide-react": "^0.533.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
