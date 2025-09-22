@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 const quizSearchSchema = z.object({
   count: fallback(z.number().min(1).max(20), 1).default(1),
-  scope: fallback(z.string(), '').default(''),
+  scope: fallback(z.string().optional(), undefined),
 });
 
 export const Route = createFileRoute('/grammar_/$level')({

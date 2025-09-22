@@ -92,7 +92,7 @@ function QuizSetup() {
       params: { level },
       search: {
         count,
-        scope: scope === 'すべて' ? '' : scope,
+        scope: scope === 'すべて' ? undefined : scope,
       },
     });
   };
